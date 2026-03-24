@@ -1,0 +1,201 @@
+game_id,sport,location,city,neighborhood,lat,lng,day_of_week,hour_of_day,duration_minutes,cost_per_player,skill_level,privacy,host_id,total_spots,game_date
+077fa837-7958-42dc-a1d0-ca588192dd15,soccer,Uptown Courts,Minneapolis,Uptown,44.9734,-93.22812,1,7,60,7.0,all,public,5660b019-bed3-4c5a-b0dc-a18ddb59ac91,12,2024-07-09
+ac5c2328-20b3-433e-8185-d17fc9b7bc3d,baseball,Shorewood Courts,Milwaukee,Shorewood,43.06154,-87.87038,3,7,90,0.0,all,private,8dfc91e8-0a51-4151-bcdf-263bceec5c8e,8,2024-06-06
+516d7916-d037-41bc-97ed-a549093bca96,basketball,Logan Square Courts,Chicago,Logan Square,41.8602,-87.65275,6,20,120,0.0,intermediate,public,5c5d5851-71b3-4ea5-8923-25bbdec058f2,10,2025-03-09
+c95abe36-196d-4d55-98ed-d87c35b49b2e,baseball,Pilsen Courts,Chicago,Pilsen,41.87334,-87.62347,1,10,60,7.0,intermediate,public,565b4faf-6021-4bb5-8ef1-0f21a6b59242,4,2024-08-27
+c2a30111-a042-45f9-9394-9d05a80b2c40,soccer,Eastern Market Courts,Detroit,Eastern Market,42.33615,-83.05405,6,19,60,15.0,advanced,public,54674073-d534-47c2-8abd-11af426fbccc,10,2025-03-16
+74bfd667-78e0-48a7-b4c7-47e7dc39141a,frisbee,Riverside Courts,Milwaukee,Riverside,43.07783,-87.89857,6,9,60,5.0,advanced,public,a8d07a64-416e-4d75-949c-75b0e480c48d,12,2025-05-11
+72208bd2-1594-47f1-ab76-25d464e288c2,hockey,Shorewood Courts,Milwaukee,Shorewood,43.05739,-87.8648,3,17,90,15.0,beginner,public,b50a010a-8fcb-4236-a1bf-653729dff4af,4,2025-05-08
+20d04c5d-46e7-4372-a407-2733f02ae4f2,pickleball,Bay View Courts,Milwaukee,Bay View,43.0614,-87.88476,4,9,90,10.0,intermediate,public,541ebc54-42cb-4f80-8358-2755e15379fa,6,2025-01-17
+99680125-04f0-447e-9976-4d836ce1bd16,volleyball,Eastern Market Courts,Detroit,Eastern Market,42.30515,-83.046,6,17,120,3.0,advanced,private,e6619e5e-1377-4bd8-9b1d-343f684e0350,12,2024-06-09
+23985fdd-84dd-4c2c-9618-e2e27bac1583,pickleball,Eastern Market Courts,Detroit,Eastern Market,42.36347,-83.03239,1,9,45,0.0,advanced,public,e61218ff-ce7f-44ac-8756-66aaf2ddda13,8,2024-01-02
+9002d85c-1bec-4d94-8bf3-a39fdebe2b83,football,Midtown Courts,Minneapolis,Midtown,45.0063,-93.23736,2,19,60,0.0,all,public,5638c2fb-bfe1-44d7-a99e-25e634980158,12,2025-02-12
+6559b32c-a1c9-4945-9f56-b34569d68dec,tennis,Rivertown Courts,Detroit,Rivertown,42.36331,-83.05628,4,20,90,0.0,all,public,5b4ba5f5-8cf7-47d2-bfce-59be31a0bfdc,12,2024-08-02
+f2b2c491-8fe7-4ce3-ae85-09279edbf1cd,frisbee,Rivertown Courts,Detroit,Rivertown,42.28641,-83.02815,3,18,45,2.0,beginner,public,af5431b6-ade6-46ee-88b9-8f4261e7b6c2,4,2025-06-12
+70d79388-3526-4285-8862-f717ae47c2da,baseball,Tenney-Lapham Courts,Madison,Tenney-Lapham,43.07279,-89.36298,1,17,90,0.0,intermediate,private,8a413caf-79c9-483a-a1d2-165867646597,10,2024-11-05
+83b0b642-8824-414d-ba9b-7c7a1ee6541a,pickleball,Rivertown Courts,Detroit,Rivertown,42.31141,-82.98986,0,18,45,0.0,intermediate,public,b517ff03-8877-4f87-aa24-f8b8b0c78551,14,2024-11-25
+6647dd2a-19c6-4273-acfe-0c8b30f7a11e,badminton,Eastern Market Courts,Detroit,Eastern Market,42.37386,-82.99475,0,20,120,15.0,advanced,public,202a178e-e8cc-497e-b541-d18063a1868c,10,2025-06-23
+5f4d3fae-988b-48fc-9161-f8a6281c82b2,baseball,Midtown Courts,Minneapolis,Midtown,44.98766,-93.30675,3,17,120,5.0,advanced,private,9b0cf326-c6c2-4cad-99fa-a1812400c6e9,14,2024-02-08
+edc7101a-34f9-4ea0-bd16-60afd53e1f8a,football,East Side Courts,Milwaukee,East Side,43.04078,-87.86111,4,19,45,3.0,advanced,public,b6363a8f-8792-41cf-aab3-581f57fc5358,6,2025-02-21
+cdc10394-84fc-4266-87f1-e8fa71ab1ed1,baseball,Walker's Point Courts,Milwaukee,Walker's Point,43.02817,-87.90576,2,10,90,5.0,advanced,public,d07c1f2b-aea8-4634-b4e5-ab3f0e67f507,12,2025-06-25
+5919a860-72f5-4e99-956d-0d46ca1749d6,badminton,Near West Courts,Madison,Near West,43.04189,-89.35956,3,20,60,7.0,advanced,public,09235e73-4fb6-4c45-ba49-c6c2285207fe,10,2024-02-29
+b239ec03-0214-4146-a350-8ade3ac6966f,football,Lincoln Park Courts,Chicago,Lincoln Park,41.83744,-87.6883,0,10,45,0.0,all,public,497097c7-1b4c-405f-a5a6-bfb00013aa61,8,2024-01-15
+41111d3f-90e2-4c76-8874-f8559ed72889,tennis,Northeast Courts,Minneapolis,Northeast,44.99628,-93.22739,5,17,45,15.0,advanced,public,7d728832-bf9e-4622-ab40-d5f5b31435e5,8,2024-03-30
+1d25291e-7aff-4f01-891f-52453a76f30c,cricket,Near West Courts,Madison,Near West,43.0814,-89.44382,0,9,60,2.0,beginner,public,fc175cd9-bccc-4b67-952b-f2a8566f279a,6,2024-05-06
+067f1c8b-ae4a-43f8-9f60-7aabc85df2e7,soccer,Riverside Courts,Milwaukee,Riverside,43.04287,-87.85894,2,10,45,5.0,all,public,38ed1681-87bb-46c8-a9a1-9445202c34ea,14,2025-04-30
+02601faf-237d-4d41-a8bd-29212bd9ce5f,hockey,Riverside Courts,Milwaukee,Riverside,43.02359,-87.91008,6,10,120,0.0,all,private,a7765eed-f13c-4b8c-b3d0-d856f6bd9cc9,10,2024-08-18
+ccaf4305-8910-4687-85bb-07ac24a6411f,baseball,Bay View Courts,Milwaukee,Bay View,43.00417,-87.86312,5,10,120,0.0,beginner,public,7b0bfc76-9a75-49f4-905b-55e7abb670dd,16,2025-06-28
+c1c291ab-1e67-4fd7-a04f-57a1d8938389,volleyball,Midtown Courts,Detroit,Midtown,42.33619,-83.06481,3,17,60,0.0,all,private,1352bd49-3b86-42fd-9976-a80c1633eddb,4,2024-03-21
+3fa73bfa-f5a1-4081-ae9f-8d5fa15c0f59,basketball,Bay View Courts,Milwaukee,Bay View,43.06585,-87.90671,5,17,120,3.0,beginner,public,e929633d-7e79-416f-9dd7-8cec593274c0,12,2024-06-08
+2178efab-add1-4a61-b934-b6451156fcc9,badminton,Pilsen Courts,Chicago,Pilsen,41.88915,-87.62807,4,18,90,15.0,intermediate,private,09235e73-4fb6-4c45-ba49-c6c2285207fe,10,2024-10-11
+ad320870-c1d2-4fb7-abac-0d0ab7d9dd1d,soccer,Wicker Park Courts,Chicago,Wicker Park,41.91454,-87.66798,2,9,120,0.0,all,public,1ca65d53-84df-4987-ac6f-5f22f4480d33,14,2024-10-02
+0ae983e5-6345-4d73-8f63-6f2f84fe4a52,cricket,Riverside Courts,Milwaukee,Riverside,43.06703,-87.86204,1,10,90,3.0,intermediate,public,a6ac1874-88b2-43ad-8b35-d2e4cf0fdab6,12,2024-01-09
+9a9964c3-57bd-4ab7-bdcb-43a5c4f1601b,frisbee,New Center Courts,Detroit,New Center,42.31399,-83.01388,2,20,45,5.0,all,public,45ffa1b4-ef24-4b18-a11b-b141be2544e4,4,2025-04-02
+5a7f7880-d698-49e1-b9e2-59497c0de9cc,pickleball,East Side Courts,Milwaukee,East Side,43.02152,-87.91319,6,9,90,2.0,advanced,private,f7c04b5a-8e43-4f12-a62e-40ea8dee6b3b,4,2024-06-02
+43a82d22-0f9f-4944-94d9-f8b24a4ec7f0,football,Walker's Point Courts,Milwaukee,Walker's Point,43.06774,-87.93649,1,18,90,5.0,beginner,public,a3cbb1ef-9d7b-4da7-8881-8fbd900f63e6,8,2024-07-30
+95fd2016-6aec-46e9-9127-01cb2cac3c48,basketball,Wicker Park Courts,Chicago,Wicker Park,41.8397,-87.59765,5,19,90,0.0,advanced,public,a117d029-cfe0-491b-a96f-56609de72cbe,10,2024-12-07
+e0946da4-c133-4b5e-8d8c-cbabd309b96e,cricket,Midtown Courts,Minneapolis,Midtown,44.99784,-93.21213,2,20,120,3.0,beginner,public,f971e5ad-fc81-4621-ac3f-e517d47cf835,14,2024-08-07
+d04df316-ab07-44af-baad-34bc5a270a85,tennis,Logan Square Courts,Chicago,Logan Square,41.86823,-87.63171,1,19,60,0.0,intermediate,private,19ecf631-bc65-4606-a260-0cac1766198f,10,2025-02-11
+1f3089a8-fb58-4a33-b3ba-7cbf43f1fbd9,frisbee,Eastern Market Courts,Detroit,Eastern Market,42.35878,-83.06675,5,8,120,15.0,intermediate,public,f58e4b5f-19e0-4040-b45d-20424af0cd2d,10,2024-06-08
+f6ecf1c5-05d5-4418-a37b-449291df277a,hockey,Midtown Courts,Detroit,Midtown,42.29417,-83.10132,0,20,90,15.0,advanced,public,ba3b9385-8ea9-4141-a059-0a0f40972ee9,14,2024-09-16
+6fe39d13-5141-4034-a6b1-70259cad0e64,basketball,Midtown Courts,Detroit,Midtown,42.36589,-82.9908,5,8,60,15.0,intermediate,public,bec9a960-cd24-4f90-8d14-d986b6ba4208,12,2025-04-19
+8dc00f29-b731-46d5-9249-5998d0f10451,hockey,Bay View Courts,Milwaukee,Bay View,43.0197,-87.9521,2,17,120,0.0,intermediate,private,aeacd066-31eb-4ab7-93b5-1a8f3f11541a,14,2024-01-03
+5667ade4-c615-4b51-a6e1-c71cdb777dbe,pickleball,Near West Courts,Madison,Near West,43.11234,-89.46237,1,17,45,0.0,intermediate,private,311484f6-7422-4805-a549-39884a900be6,10,2024-04-30
+fb325a38-d977-497f-8a50-84a2d3585e3a,basketball,Midtown Courts,Minneapolis,Midtown,44.95496,-93.30334,4,8,60,10.0,advanced,public,b135e706-7ee9-4ab5-917b-f4f1967a02ea,14,2024-05-17
+2a0f68ef-70f3-44de-8573-09b048f0ce58,basketball,Longfellow Courts,Minneapolis,Longfellow,44.96226,-93.25035,1,7,120,2.0,beginner,public,e0d5cd3b-55dc-4a07-b86b-59a3a96653aa,12,2024-12-24
+902a3cc5-bda8-4f5f-b804-94557395b603,cricket,Longfellow Courts,Minneapolis,Longfellow,44.98704,-93.24022,2,9,60,15.0,beginner,private,f5f75927-7360-4921-b1c1-1b3c21958b2a,4,2024-08-28
+876bdb07-77b1-4507-8d1f-1c7dec054e50,frisbee,Near East Courts,Madison,Near East,43.05694,-89.34394,3,17,90,0.0,all,public,cdbd50cf-957d-4275-9814-a3d441a804f1,16,2024-03-28
+87b6812e-7ef9-49ea-8d56-02b738e4b93b,frisbee,Seward Courts,Minneapolis,Seward,44.95776,-93.27125,3,19,60,0.0,intermediate,public,bc8e5e98-0f49-4165-881d-d41b1ca40276,14,2024-03-21
+b32a41b0-d1d4-4c5a-b785-d5e793214401,hockey,Wingra Courts,Madison,Wingra,43.07856,-89.3537,0,8,90,15.0,intermediate,public,e6619e5e-1377-4bd8-9b1d-343f684e0350,6,2024-12-30
+d7e8d7a0-78b6-4a12-bb7e-7c7b5d370a12,pickleball,Near East Courts,Madison,Near East,43.08596,-89.43946,5,7,120,15.0,all,public,a9f778b0-31a6-40f8-98e6-ece560f72da5,10,2024-04-20
+c5742cd6-893e-49c7-8d22-8fa8c5d1243f,baseball,Walker's Point Courts,Milwaukee,Walker's Point,43.04781,-87.91689,1,10,90,3.0,beginner,public,477b7a42-8acf-4ffb-ae58-2a14d6386acc,6,2025-06-10
+4db30aa5-c286-4292-8d26-398a2516568f,basketball,Midtown Courts,Minneapolis,Midtown,44.93832,-93.22397,4,8,60,2.0,beginner,public,006ab9f8-4996-482d-a054-9f0378460ecf,4,2024-02-09
+614da1dc-e816-446a-b58e-7d62038409a5,badminton,Midtown Courts,Minneapolis,Midtown,44.9809,-93.29346,5,18,45,0.0,beginner,private,44f73918-aa86-4b42-9a80-a5314affc1d8,6,2025-03-15
+5909e3f9-6b98-4d58-8b30-506eeff4627d,hockey,Northeast Courts,Minneapolis,Northeast,45.00625,-93.30621,1,7,90,0.0,advanced,public,ba7e35ec-d1c9-433b-b150-028f4f067c05,6,2024-08-27
+b5c6a974-e251-4ad6-b110-e872b3956c46,rugby,Eastern Market Courts,Detroit,Eastern Market,42.31789,-83.05929,6,9,45,5.0,advanced,public,b19811a1-b4b2-4da9-a85b-54cd99ec5465,6,2025-02-16
+3154513e-dd2c-49dc-9529-dcbadd85b12b,frisbee,Corktown Courts,Detroit,Corktown,42.36376,-83.0705,3,8,120,3.0,intermediate,private,efa30602-f9e0-4daf-95b5-43c0dd383a50,4,2025-05-29
+7bea97e5-d468-4849-b636-c46b043bfcac,basketball,New Center Courts,Detroit,New Center,42.30466,-83.06802,0,19,45,5.0,all,public,cea2165a-7713-4120-9c98-12cbb2443904,14,2024-06-17
+3060b1cf-e632-4def-bdd6-cc94f07d1b80,volleyball,Seward Courts,Minneapolis,Seward,44.94704,-93.27556,4,20,90,7.0,all,public,efa30602-f9e0-4daf-95b5-43c0dd383a50,6,2025-01-03
+4061c1c9-2359-4e43-a57e-a3c8742df38f,cricket,Bay View Courts,Milwaukee,Bay View,43.01301,-87.85617,3,10,120,10.0,all,private,cadd1013-584a-41f5-8200-a9c506faa2e0,4,2024-02-01
+1b4b2dc9-df9a-4d51-a686-5fd3c055506c,volleyball,Rivertown Courts,Detroit,Rivertown,42.34757,-83.07743,3,10,60,2.0,intermediate,public,16077633-cef4-47c2-8d0e-512e1a74dece,8,2024-05-16
+4c14d99a-8d23-4651-b8d2-ea57fc4d8863,baseball,Tenney-Lapham Courts,Madison,Tenney-Lapham,43.03964,-89.416,3,7,90,15.0,intermediate,public,3b0cf123-7969-4817-8da6-0a5be2881a47,14,2024-04-25
+188589b5-005c-43b1-b388-0bbddbb241a2,badminton,Pilsen Courts,Chicago,Pilsen,41.86548,-87.61639,4,9,45,0.0,beginner,public,69bef753-27f5-4a56-a003-d5cc5af3b61a,16,2025-02-07
+71903f92-cb13-43c8-9e8f-a5113efff14c,tennis,Rivertown Courts,Detroit,Rivertown,42.35759,-82.9997,6,9,60,2.0,advanced,public,d07c1f2b-aea8-4634-b4e5-ab3f0e67f507,16,2024-07-07
+6ee2afab-fd76-4e34-9812-e946552d79f6,tennis,Wingra Courts,Madison,Wingra,43.07954,-89.42856,2,7,45,0.0,all,public,916d7b48-2916-4ae6-861d-3707f41b6cee,14,2025-04-23
+e7c7ce49-5ce1-44df-a294-81ef33decc2d,frisbee,Corktown Courts,Detroit,Corktown,42.30176,-83.05485,3,18,60,2.0,advanced,public,6053021e-ccb6-450a-8adb-776d77141bde,12,2025-02-06
+79386455-6954-4ad7-b83a-ca7bdcca4c23,hockey,Seward Courts,Minneapolis,Seward,44.94937,-93.31664,2,9,60,5.0,advanced,public,66491551-27f7-48d5-9437-788a288c2556,8,2024-11-20
+7c12fc1f-24ec-434c-87f6-95b6730d0402,pickleball,New Center Courts,Detroit,New Center,42.34177,-83.06025,1,18,45,10.0,advanced,public,0e7807bd-9f43-46d3-8ea2-e7c27cd99afb,16,2025-06-03
+af0b1e6f-017b-48c4-8e27-a37bf3c5af09,frisbee,Hyde Park Courts,Chicago,Hyde Park,41.88713,-87.67914,3,17,45,2.0,intermediate,public,565b4faf-6021-4bb5-8ef1-0f21a6b59242,14,2025-03-06
+1894195d-7366-419a-a0f2-05b51c7bfb1e,rugby,Logan Square Courts,Chicago,Logan Square,41.87122,-87.65407,4,17,45,7.0,intermediate,public,026ae92a-e95b-4f22-8aed-4a30c81a9684,8,2025-02-14
+3133d38f-1548-4004-b088-d1c95fceaa6a,frisbee,Wicker Park Courts,Chicago,Wicker Park,41.83529,-87.63827,1,20,45,2.0,advanced,public,954ca534-fb20-425c-9774-b2c31da97ea6,10,2025-02-11
+d54490a4-bf4e-4acc-8a81-7e15dfc48c0e,pickleball,Seward Courts,Minneapolis,Seward,44.98447,-93.24153,0,17,45,5.0,intermediate,private,89ba3330-f5ca-43a4-abfd-8a722615fdf7,6,2024-05-13
+5bb23f0f-adf9-405a-aed9-a8aebbf49110,badminton,Shorewood Courts,Milwaukee,Shorewood,43.00765,-87.9273,5,18,120,0.0,beginner,public,684ce5c3-fb76-4fc5-a8f8-da229cb7759a,12,2024-05-11
+9b5d992e-b166-4442-a617-ed9776fba0bb,frisbee,Vilas Courts,Madison,Vilas,43.0942,-89.35586,1,8,120,2.0,intermediate,public,0542814d-3f8d-4c33-bbc0-3aaa92378597,4,2024-08-27
+6522b0d5-50ad-47d6-a3ef-9f2a308753ec,pickleball,Shorewood Courts,Milwaukee,Shorewood,43.08325,-87.87515,2,19,120,0.0,all,private,a8d07a64-416e-4d75-949c-75b0e480c48d,12,2025-04-30
+dbdebb17-fcd3-4f65-97d2-440d7cca263a,hockey,Vilas Courts,Madison,Vilas,43.09384,-89.36398,6,19,120,7.0,beginner,public,ffee88fa-c20a-4396-a8cd-631dd70c25ca,4,2025-03-30
+2fe965aa-f06a-4433-b6a3-529e5f506950,basketball,Eastern Market Courts,Detroit,Eastern Market,42.32917,-83.02895,1,17,90,7.0,intermediate,public,104038f7-52ee-4c98-9212-58b44fd728fd,16,2024-11-05
+d8321794-1c9d-438b-a9a5-6a973e0e29ee,volleyball,Near West Courts,Madison,Near West,43.06692,-89.36177,2,19,120,2.0,advanced,public,006ab9f8-4996-482d-a054-9f0378460ecf,12,2025-04-09
+87ea9570-dbe6-481b-96fa-72e53b6f8cb0,soccer,Pilsen Courts,Chicago,Pilsen,41.91971,-87.66018,6,18,45,7.0,intermediate,public,a8d07a64-416e-4d75-949c-75b0e480c48d,10,2024-11-03
+8e4deaeb-ddfd-4313-8201-73e954082125,badminton,Lincoln Park Courts,Chicago,Lincoln Park,41.9174,-87.58057,0,10,90,0.0,all,private,8a689c56-5823-4797-a933-4aba589512e4,4,2025-02-17
+0ff041e6-25d9-484f-a3e5-676a71f67afc,pickleball,Midtown Courts,Minneapolis,Midtown,44.98493,-93.30737,6,20,45,0.0,intermediate,public,2bf20b3b-7da4-47f1-9608-310660fb805d,14,2025-02-02
+a63fae07-d8f2-4ebe-a88d-e026bc8060e7,badminton,Seward Courts,Minneapolis,Seward,44.99805,-93.22733,6,19,60,5.0,beginner,public,d9a35cf3-a98f-4f37-9779-6867fe990d35,12,2024-05-19
+ad233be1-2660-4782-97b4-4168dde14b6e,cricket,East Side Courts,Milwaukee,East Side,43.01288,-87.94484,0,19,120,10.0,beginner,public,8ef7c03c-a930-4a8a-8470-682262a8ed32,8,2024-01-15
+aee352ca-5664-4e60-9a55-99d0ab039192,rugby,Logan Square Courts,Chicago,Logan Square,41.84118,-87.60354,5,8,60,0.0,advanced,public,8d497583-85ee-4fa7-b875-fd7837d734ef,6,2024-10-05
+12a82a16-966b-456b-bd37-c45ab586873d,volleyball,Shorewood Courts,Milwaukee,Shorewood,43.07281,-87.92997,1,8,120,7.0,advanced,public,c7a4f247-41d7-4f41-bf2c-900fa097b84b,4,2024-11-12
+bf15c0cb-f0cd-41c2-bc8a-cbec153496b3,rugby,Corktown Courts,Detroit,Corktown,42.33244,-83.0518,4,8,120,7.0,advanced,private,8eaa9194-9aed-4a92-a27a-d27bf343d0d7,14,2024-02-16
+7417ddf7-fd88-4668-a9a4-c7754a88b951,hockey,Riverside Courts,Milwaukee,Riverside,43.03571,-87.92575,3,9,60,5.0,beginner,private,e0d5cd3b-55dc-4a07-b86b-59a3a96653aa,4,2024-09-19
+00d5b0be-b2f2-47ab-b309-2373987223dc,baseball,Riverside Courts,Milwaukee,Riverside,43.07744,-87.94778,4,8,120,7.0,advanced,public,69bef753-27f5-4a56-a003-d5cc5af3b61a,16,2024-05-31
+049b09c5-bc00-45ae-a7cf-76ca89b7d138,pickleball,Pilsen Courts,Chicago,Pilsen,41.86251,-87.6796,3,8,120,5.0,all,private,e440be06-19e4-47d4-a9f3-fd3670f3612a,12,2024-06-20
+0d04f0a3-9aa8-49e1-ad91-cf908aa485b5,badminton,Shorewood Courts,Milwaukee,Shorewood,43.06503,-87.90495,3,8,60,0.0,advanced,public,2af4c6e9-e502-4a16-8e14-3b047d94ed5c,16,2024-02-01
+f958fb67-1d23-44dc-be73-3e58f7fecd34,football,Vilas Courts,Madison,Vilas,43.0877,-89.38509,1,20,60,7.0,intermediate,private,f2dae530-945f-4b0c-a34e-40fd51f09ece,14,2024-12-24
+f51ddedb-1ba4-4272-9283-0b48d7e1969f,soccer,Hyde Park Courts,Chicago,Hyde Park,41.89438,-87.59135,6,10,120,0.0,all,public,071dfc68-5b41-4275-bf72-d96b73aeeae1,8,2025-06-08
+6ee420f2-1cb5-4c39-99ef-336ff05e75ef,volleyball,Lincoln Park Courts,Chicago,Lincoln Park,41.87732,-87.60506,1,7,120,0.0,all,private,ef33a470-e377-407d-9ce9-99f80c395d02,10,2024-12-03
+8a9b9993-bb52-410c-88f5-b44e4f921432,soccer,Vilas Courts,Madison,Vilas,43.11471,-89.45238,0,10,120,15.0,advanced,private,e67e772a-29b1-41b8-a005-9f1fa1534c75,4,2025-02-17
+62b4e8df-3165-4f37-ac18-a944e7271083,frisbee,Near East Courts,Madison,Near East,43.11211,-89.43497,5,17,90,0.0,intermediate,public,16077633-cef4-47c2-8d0e-512e1a74dece,14,2024-07-13
+93edb14f-1a14-48fc-a964-289875ab5b91,volleyball,Northeast Courts,Minneapolis,Northeast,45.01926,-93.31239,2,20,60,3.0,all,public,edd281db-3e07-442b-86d0-8a4765fce028,8,2025-05-21
+12f22589-a8bb-43dd-a4df-a23c7a30a2cc,frisbee,Wingra Courts,Madison,Wingra,43.09095,-89.43554,3,9,45,7.0,all,public,0331581c-570b-4d77-86c5-330d1c69274b,8,2025-01-09
+cd4cbc52-c83a-4e1e-bcab-34a42095aa22,tennis,Hyde Park Courts,Chicago,Hyde Park,41.84689,-87.62226,5,7,90,10.0,intermediate,private,5b4ba5f5-8cf7-47d2-bfce-59be31a0bfdc,12,2024-01-13
+320910ea-9472-4122-9f87-389208da71ee,football,Wingra Courts,Madison,Wingra,43.08652,-89.36687,2,10,45,7.0,all,public,aaf5003f-4ef0-4808-90b2-6a7d61be0448,8,2024-12-18
+85c668df-dd6c-4256-97cf-077cc2307da3,frisbee,Longfellow Courts,Minneapolis,Longfellow,44.93416,-93.30236,2,7,60,0.0,advanced,public,e61218ff-ce7f-44ac-8756-66aaf2ddda13,8,2024-05-29
+6d877c5a-12a0-4a55-bab6-eb5e758b8a8e,volleyball,Longfellow Courts,Minneapolis,Longfellow,44.94881,-93.32611,6,8,60,7.0,advanced,private,d929d1e0-3d0a-458a-b0ce-c198b14d151b,8,2024-01-28
+36f5b2e5-1e67-47ba-b0af-06c1d2ef0eef,baseball,Corktown Courts,Detroit,Corktown,42.34307,-82.99271,6,9,120,3.0,all,public,bc8e5e98-0f49-4165-881d-d41b1ca40276,16,2024-12-29
+f20f4962-08f0-4957-a4c8-4f2873cdec81,tennis,Near West Courts,Madison,Near West,43.0792,-89.4459,3,17,45,15.0,beginner,private,f1f40919-d676-4846-ae98-04f31d7256ef,6,2025-04-24
+ec00145b-0585-4bf6-8994-4796a0fcf04c,football,Walker's Point Courts,Milwaukee,Walker's Point,43.03267,-87.92003,5,20,60,0.0,all,private,853ee20d-7e44-43d6-b101-38c573e0448f,16,2024-02-03
+54ae8498-ffd7-40d1-b2c0-ea7233f1efdc,tennis,Bay View Courts,Milwaukee,Bay View,43.01906,-87.88359,3,19,90,0.0,all,private,1cdfae95-b4d6-4038-8147-c4f3d88d07ec,14,2025-03-13
+5269647b-c716-4160-b894-f18e948c862b,rugby,Tenney-Lapham Courts,Madison,Tenney-Lapham,43.08461,-89.39647,6,17,45,7.0,all,public,d07c1f2b-aea8-4634-b4e5-ab3f0e67f507,12,2025-02-23
+14e589be-2c23-48d4-a8b0-bde7d9534bd9,rugby,Logan Square Courts,Chicago,Logan Square,41.89818,-87.62436,2,9,45,0.0,intermediate,public,59c9f928-f501-49f3-9f80-bb9731c1521b,4,2024-06-05
+08451d30-eddf-45cf-a200-02538d7273ab,basketball,Shorewood Courts,Milwaukee,Shorewood,43.07814,-87.89117,4,17,60,7.0,advanced,private,6dcb2181-5e1e-4078-b011-40210ed7a117,16,2024-06-28
+e57dbc68-10ba-45fc-b81f-1c27ac8e51ff,soccer,Vilas Courts,Madison,Vilas,43.08399,-89.41184,0,10,60,2.0,intermediate,private,9c6ce167-8b4f-4a29-accb-55934dfcd35a,12,2024-11-04
+6cbbb38f-a8fc-46b4-bc78-b67865326e4c,pickleball,Pilsen Courts,Chicago,Pilsen,41.87268,-87.60734,4,20,45,15.0,advanced,public,fae17aca-d5ab-46fb-91e2-a2c47a1e315b,6,2024-06-07
+a448cd2c-2e7b-4f64-b9f2-75506bbd0e6c,football,Uptown Courts,Minneapolis,Uptown,45.00438,-93.29264,5,18,120,0.0,intermediate,public,d734f9da-a6ab-4adb-95c8-c8ed161f2c25,4,2024-07-13
+ca67c9a5-f9d5-4187-9e62-636d33a7cf5a,pickleball,Hyde Park Courts,Chicago,Hyde Park,41.89185,-87.61672,0,7,120,2.0,all,public,d9a35cf3-a98f-4f37-9779-6867fe990d35,12,2024-12-16
+4b320d17-d172-472d-854d-0eba696c5a75,pickleball,Uptown Courts,Minneapolis,Uptown,44.97855,-93.23541,5,18,90,10.0,beginner,public,5b4ba5f5-8cf7-47d2-bfce-59be31a0bfdc,8,2024-12-14
+a8618b7d-edb4-4303-b073-1eb99ef9065d,soccer,Isthmus Courts,Madison,Isthmus,43.05358,-89.41057,3,17,60,5.0,beginner,public,6c5eeceb-ebd8-4b10-8dae-3be5ce2b8077,14,2024-05-09
+e7d8edaa-31fd-4c13-a2ea-e07f7e62038a,volleyball,Shorewood Courts,Milwaukee,Shorewood,43.02689,-87.91994,4,17,60,0.0,all,private,ffee88fa-c20a-4396-a8cd-631dd70c25ca,8,2024-08-30
+6da2e768-9fbf-4b85-84a3-1a56fbb0e312,badminton,Walker's Point Courts,Milwaukee,Walker's Point,43.06631,-87.9142,1,18,90,0.0,all,private,07080c4f-bc21-4bff-b199-da381e2299f9,14,2024-04-30
+9ea9b8cd-6071-478d-9e9f-afb63d2b2e8b,rugby,Isthmus Courts,Madison,Isthmus,43.03539,-89.4049,1,7,120,2.0,all,private,114a13d1-a71b-4fd8-8952-365c04ef9570,10,2025-03-18
+5fac5e5f-fc98-474a-9a15-535a896d3d15,tennis,Isthmus Courts,Madison,Isthmus,43.05902,-89.34579,5,17,60,3.0,beginner,public,4dacb442-14b2-46ee-96cc-7fdad843253b,16,2025-01-04
+5a74a121-5a71-4618-adc8-4b1d8611f492,baseball,Corktown Courts,Detroit,Corktown,42.33715,-83.07537,6,17,90,2.0,beginner,public,04b2d5c1-5857-47c0-a3c0-103cbf91fff7,10,2024-03-31
+af5ec225-ad93-4c00-a3cc-1c5648a227e0,badminton,Midtown Courts,Minneapolis,Midtown,44.96614,-93.30274,3,8,45,7.0,all,public,ec555012-c463-43e9-a599-49a6a40522a4,12,2024-09-12
+86d7b050-0327-4804-baca-cb9fff630d1e,pickleball,Hyde Park Courts,Chicago,Hyde Park,41.84385,-87.56942,0,10,45,0.0,advanced,public,fc9056c7-7ce1-4f35-9ed1-91391e49c925,16,2024-12-16
+b8647afa-fe6a-4bdb-a01a-f7a421209990,soccer,Bay View Courts,Milwaukee,Bay View,43.0797,-87.96567,1,19,60,3.0,intermediate,public,fa4d7832-c590-497b-b851-c5307699ed63,4,2024-01-02
+b3b028d4-f0f6-48fb-bd6e-028a420c061d,frisbee,Shorewood Courts,Milwaukee,Shorewood,43.05849,-87.8554,3,18,120,0.0,all,private,8a413caf-79c9-483a-a1d2-165867646597,12,2024-09-12
+63a33a54-e5af-46be-8b26-42d7a25cc67c,badminton,Walker's Point Courts,Milwaukee,Walker's Point,43.08164,-87.96328,1,17,120,0.0,intermediate,private,c81fa6f5-fb69-49fd-9261-622f8d694669,12,2024-09-10
+aa0daa49-277b-4ad2-8efe-c888ac6b7672,volleyball,Wicker Park Courts,Chicago,Wicker Park,41.90958,-87.5779,6,9,90,10.0,beginner,public,c9f5e72b-9df3-4c29-85f5-50d1af56fafd,12,2024-08-18
+a23b9bbd-8865-4557-a45b-89870c366dfd,volleyball,Tenney-Lapham Courts,Madison,Tenney-Lapham,43.08781,-89.39924,0,18,90,7.0,all,private,3f6ed640-a51a-43ca-894e-8fcac51f298f,12,2024-03-18
+f2becdfe-4618-4cf5-82d0-da499a8e0eda,cricket,Seward Courts,Minneapolis,Seward,45.01605,-93.24971,6,9,45,10.0,intermediate,public,f3bafc7d-817d-49d4-affd-8d89d3564003,10,2025-02-09
+5a6114bd-9e38-4144-bd8e-f44dddf9f0e2,tennis,Midtown Courts,Detroit,Midtown,42.29838,-83.0833,1,10,45,0.0,intermediate,public,6f0da72b-170f-4d42-993c-b004e72b181f,8,2024-08-06
+180a0b66-e2ea-428b-a585-0c97d94fc676,rugby,Walker's Point Courts,Milwaukee,Walker's Point,43.06685,-87.88125,2,17,45,10.0,beginner,public,f2079dd4-1e9d-4190-92ac-d3d687162036,12,2024-05-08
+f0e3b10f-f589-4636-853b-2ad211000d58,baseball,Logan Square Courts,Chicago,Logan Square,41.89328,-87.59194,1,10,120,0.0,all,public,4fc53d33-aa74-495c-a38e-03b7a7ec5aa3,16,2024-07-23
+8bcbc271-d1c5-45d6-94d8-468d33fd34e5,cricket,Uptown Courts,Minneapolis,Uptown,44.98204,-93.22426,2,17,45,2.0,beginner,private,bec9a960-cd24-4f90-8d14-d986b6ba4208,8,2024-03-27
+f817deba-3ee8-4111-9d3a-e8fd64e65f9b,soccer,Hyde Park Courts,Chicago,Hyde Park,41.91102,-87.64355,0,17,60,0.0,intermediate,public,5c67639e-33d9-4db5-9033-670025eec2b6,16,2024-09-16
+a68e80c8-fdd0-4218-8ccc-d604f5cb009f,cricket,Eastern Market Courts,Detroit,Eastern Market,42.31382,-83.04352,5,17,60,7.0,intermediate,public,d5fa442a-1612-4d49-ac01-1e8937292ae7,6,2025-05-17
+78842be9-230d-4af1-896a-76cdcaf33ee5,rugby,Riverside Courts,Milwaukee,Riverside,43.03264,-87.94128,3,19,120,15.0,intermediate,public,9435c6d7-2a3a-49e9-bc91-f133eb2829f9,8,2024-12-26
+c315ff65-d2a6-471c-a1ed-c554d53d199e,rugby,Hyde Park Courts,Chicago,Hyde Park,41.86423,-87.57863,0,8,60,15.0,beginner,public,4581802a-b6da-41f6-aca9-2048fb85d73c,14,2024-02-05
+72f0cdba-6d14-480b-9291-f451bd586d3b,football,Uptown Courts,Minneapolis,Uptown,44.9811,-93.22314,4,7,45,0.0,intermediate,public,9496b689-7fb3-4692-bf8b-d0659e469813,14,2024-11-01
+ceeb75d8-90d0-4910-be0c-1664be69b1c5,tennis,Bay View Courts,Milwaukee,Bay View,43.07583,-87.90263,4,17,45,7.0,intermediate,public,8ff8820b-103c-479b-abe3-f214a6255987,10,2025-03-07
+b2e5abc5-b6c8-408a-8b49-396d1f7ff3c7,pickleball,Seward Courts,Minneapolis,Seward,44.936,-93.26537,5,7,60,0.0,advanced,public,7f6535db-acd6-486b-bf85-d9b98199b4b9,10,2024-10-05
+8b3feff8-9da5-4291-89b0-4bcf5fabb796,baseball,Seward Courts,Minneapolis,Seward,44.96363,-93.24601,3,10,120,0.0,beginner,private,34e9f40c-ec10-46c7-8a5b-0b61618ffb30,16,2024-08-08
+2c099937-ec88-43f2-8a5c-81840b738bee,hockey,Lincoln Park Courts,Chicago,Lincoln Park,41.83964,-87.66783,1,19,45,2.0,intermediate,private,e1f8b717-06c0-4a57-9fba-3554835c372d,10,2024-02-20
+77505121-7dd7-47eb-93b6-7c27ba9cdcbd,football,Hyde Park Courts,Chicago,Hyde Park,41.88786,-87.66878,4,20,60,15.0,intermediate,private,a6ac1874-88b2-43ad-8b35-d2e4cf0fdab6,12,2024-04-26
+8e233176-6f78-49f0-9782-3b7470acd2e9,basketball,Lincoln Park Courts,Chicago,Lincoln Park,41.84126,-87.58434,2,19,60,10.0,beginner,public,0e7807bd-9f43-46d3-8ea2-e7c27cd99afb,4,2024-04-24
+8970528e-9234-4e53-b696-2be36b4357cc,basketball,Seward Courts,Minneapolis,Seward,44.97108,-93.20654,1,20,120,7.0,intermediate,public,684ce5c3-fb76-4fc5-a8f8-da229cb7759a,6,2024-12-10
+bb827c9a-1d3b-4929-a4b9-f07061561e21,soccer,Bay View Courts,Milwaukee,Bay View,43.00007,-87.89499,5,8,120,5.0,beginner,public,95e7915a-254e-49fe-9cd0-18dc237a6d59,8,2025-01-25
+c83e1ea0-e5e8-4e6e-8772-3c43605e2cb8,frisbee,Riverside Courts,Milwaukee,Riverside,43.07916,-87.95506,3,10,60,3.0,intermediate,private,2064dc34-73f6-4cd4-a173-a788f06aa651,14,2024-02-01
+418addef-cd0d-43e0-a908-0082175bf524,soccer,Isthmus Courts,Madison,Isthmus,43.03974,-89.37718,4,20,60,2.0,beginner,public,18bc79e0-fa16-4455-843b-657ce177260f,10,2024-06-21
+35ab4687-a9a4-497c-a849-30f093c24820,hockey,Corktown Courts,Detroit,Corktown,42.31742,-83.09572,0,10,90,10.0,beginner,public,a190a8e1-ab2c-412c-9318-bcdd35592cb6,4,2024-08-19
+5999460b-2a4c-4115-b63b-1ddf8f73ddd4,cricket,Tenney-Lapham Courts,Madison,Tenney-Lapham,43.06698,-89.44519,2,18,120,10.0,intermediate,private,3a2921f5-be39-4d08-bc40-4298372b1927,4,2024-03-27
+589a0c7f-d514-4446-a636-cfb5038efdf9,soccer,Isthmus Courts,Madison,Isthmus,43.04112,-89.3985,6,8,90,5.0,advanced,public,87b7ebc3-eaca-4138-93cb-7eaaa152baca,8,2025-01-26
+c1d37f31-e25a-4eae-8614-5d476fd0f8c9,badminton,Northeast Courts,Minneapolis,Northeast,44.95098,-93.3217,6,18,45,0.0,beginner,public,fad4d88b-0dcc-4c85-8cc6-8ec365f005f7,4,2024-02-11
+3ae4c72d-46db-4035-81b2-2c614e0baab7,cricket,Longfellow Courts,Minneapolis,Longfellow,44.97721,-93.24567,0,7,90,0.0,all,public,f4cf5144-e876-4f09-af87-d8033a96ac1f,10,2024-07-22
+ef56b01a-36f3-4445-a805-3d8921162e1c,volleyball,Vilas Courts,Madison,Vilas,43.08042,-89.43398,2,7,60,0.0,all,public,c7a4f247-41d7-4f41-bf2c-900fa097b84b,12,2024-08-28
+964b0199-b957-4802-8177-d31dc4d537df,volleyball,Longfellow Courts,Minneapolis,Longfellow,44.93923,-93.30064,3,10,45,3.0,beginner,public,40031f44-fef9-467b-8700-e20631064593,14,2024-03-14
+1bb07944-25bd-4165-a188-5611a1ab7639,rugby,Rivertown Courts,Detroit,Rivertown,42.37611,-82.98735,1,17,60,3.0,beginner,public,5b4ba5f5-8cf7-47d2-bfce-59be31a0bfdc,16,2025-06-24
+568dccfd-49de-44e4-840e-567d3ad66775,rugby,Shorewood Courts,Milwaukee,Shorewood,43.00112,-87.92825,4,8,45,2.0,all,public,f02b0a26-c451-4ecb-a085-2dd436ec4198,14,2024-01-05
+b61de894-b96c-4e9b-adcd-9a2a6b6083ce,pickleball,Wingra Courts,Madison,Wingra,43.03663,-89.40697,0,18,60,0.0,all,public,54674073-d534-47c2-8abd-11af426fbccc,6,2024-01-08
+a0e4e06f-2599-44fd-8079-1aaaa037b3c1,baseball,Midtown Courts,Detroit,Midtown,42.3026,-83.01947,6,9,120,5.0,all,private,fdfcfe99-0d96-4b01-99e6-23a06f2dd002,6,2024-05-26
+d16e63ea-a630-4d2e-b22b-5a8d2dc1fd8c,badminton,Logan Square Courts,Chicago,Logan Square,41.85476,-87.62515,3,17,45,10.0,beginner,public,74ad4bc0-e881-4041-9ade-e8909c4c8515,16,2025-04-10
+3941169a-1df1-4ceb-8c38-f3c708fb32f9,basketball,Midtown Courts,Detroit,Midtown,42.33098,-83.08815,5,8,45,2.0,beginner,private,881be873-290e-4193-8476-06eb51f88388,4,2024-08-10
+d4e8b4ef-6968-4461-bb81-7bd1aabaf2a8,badminton,Eastern Market Courts,Detroit,Eastern Market,42.31012,-83.08573,5,8,120,15.0,all,private,b008a8d5-a664-448a-b9b7-b1d40a49c61b,16,2024-11-30
+23bb0f01-da3c-4c3f-9de4-e62010d1d4bc,badminton,Uptown Courts,Minneapolis,Uptown,44.93663,-93.2567,5,17,90,15.0,intermediate,public,54bcabdf-bd73-4c49-a15c-e7f94439a5a2,12,2024-05-18
+ff994729-0691-4fb7-aa6b-9f51b02be622,soccer,Near East Courts,Madison,Near East,43.06885,-89.45204,3,9,90,2.0,intermediate,public,8b9d9013-49ed-4415-8a1b-04a27145d3ed,16,2024-05-16
+a939174b-780c-4ae2-8872-ed864b32cb9c,badminton,Midtown Courts,Minneapolis,Midtown,44.95273,-93.30405,3,9,60,0.0,all,public,817f1f80-53d2-4e59-a423-89e5b3a9dfb6,8,2024-08-15
+26d93867-b609-4d08-bf18-85de3b1a2300,soccer,Wingra Courts,Madison,Wingra,43.09981,-89.34609,2,10,90,7.0,all,public,c0078f74-092d-4628-9fab-3e6d52b879ba,4,2025-05-07
+d1354a72-8668-431b-8b84-337ca87872ad,soccer,Wicker Park Courts,Chicago,Wicker Park,41.89278,-87.63222,3,20,60,0.0,beginner,public,b36ebd73-0009-4af0-8a8d-55a331ccf0b9,14,2024-12-19
+0832ac24-6fd8-49b2-95ca-1fbc2726a9a6,hockey,Longfellow Courts,Minneapolis,Longfellow,44.96474,-93.24712,5,8,90,3.0,advanced,public,2147ccc2-2745-4cd7-9895-e1c781bc2196,6,2024-10-05
+8e40cf27-5ede-43d9-93a4-be29aaa9c4f5,basketball,Lincoln Park Courts,Chicago,Lincoln Park,41.84423,-87.64278,1,9,120,7.0,beginner,public,a0b4e51a-f4c7-4f34-9e53-deec1dab4fb6,8,2024-12-24
+e33e6884-1dae-489b-a9e0-74306fe4cf49,pickleball,Midtown Courts,Detroit,Midtown,42.32048,-83.00661,0,20,60,15.0,beginner,private,ac9f7873-e3f2-405f-b65d-7829ae40ca5f,8,2025-04-07
+bcd80994-8000-4f7a-b6a9-1acd3ebb5b6e,baseball,Corktown Courts,Detroit,Corktown,42.35424,-83.09025,3,20,120,3.0,beginner,public,c4daf70d-58ec-4299-a169-eab7a03d42b1,16,2025-01-02
+60ed90ce-b58f-435f-8061-3fdf76473507,basketball,Shorewood Courts,Milwaukee,Shorewood,43.01726,-87.93836,3,9,60,0.0,beginner,private,d3626f5f-d307-40a5-978c-c820e5bac5b0,6,2024-09-19
+94af4257-20c0-4dd0-ad35-8006cd695611,volleyball,Pilsen Courts,Chicago,Pilsen,41.86609,-87.60348,2,20,45,0.0,all,public,5b1ba7ab-e063-403a-a0d5-d912f86b42b8,12,2024-08-28
+294f69ec-0a8a-46cf-8b7a-d3e9e3beedb2,frisbee,Wicker Park Courts,Chicago,Wicker Park,41.88235,-87.63602,1,18,120,5.0,beginner,public,6053021e-ccb6-450a-8adb-776d77141bde,8,2024-12-31
+2e694241-4971-43b7-a1d0-7d130b6fcce3,badminton,Near West Courts,Madison,Near West,43.1046,-89.42672,1,20,45,0.0,intermediate,public,f0181d41-db45-4538-9d97-bc0060f4541f,6,2024-06-18
+8c72d091-324b-49cb-ab9a-05342d792684,pickleball,Uptown Courts,Minneapolis,Uptown,45.00483,-93.20555,5,18,90,3.0,advanced,public,9496b689-7fb3-4692-bf8b-d0659e469813,16,2024-08-03
+b413b102-cdc7-4388-9d66-821f05411311,pickleball,Near West Courts,Madison,Near West,43.04261,-89.39058,1,7,45,5.0,advanced,public,e929633d-7e79-416f-9dd7-8cec593274c0,6,2024-04-23
+f7379176-13db-47d5-8ca0-ffccb9699b8f,pickleball,Corktown Courts,Detroit,Corktown,42.3117,-83.02201,3,19,120,10.0,intermediate,public,5bd985d0-d17d-47d4-818b-5ee9350a1906,16,2025-03-06
+7bca33d7-6f7a-4771-8962-6dbe548d4936,frisbee,Riverside Courts,Milwaukee,Riverside,43.01016,-87.91971,3,18,90,2.0,advanced,public,8b4a47d6-3578-42bc-ba48-69edbc785c9a,12,2024-08-08
+e540a7f8-ecca-4727-8f17-ca323f422cb2,badminton,Lincoln Park Courts,Chicago,Lincoln Park,41.8488,-87.68678,5,19,60,3.0,intermediate,public,bc8e5e98-0f49-4165-881d-d41b1ca40276,4,2024-08-17
+713e210d-f9f1-4b7e-b04c-04bf6acc434c,basketball,Seward Courts,Minneapolis,Seward,44.99124,-93.25558,3,8,120,0.0,advanced,public,cea2165a-7713-4120-9c98-12cbb2443904,14,2024-02-01
+c420929e-85d7-4730-9a04-6c8093f990ea,hockey,Wingra Courts,Madison,Wingra,43.06134,-89.42905,1,9,90,5.0,beginner,public,38ed1681-87bb-46c8-a9a1-9445202c34ea,10,2024-09-03
+9f76d171-5f96-4fc9-b86a-972b41a84d97,badminton,Corktown Courts,Detroit,Corktown,42.31425,-83.04091,4,20,60,7.0,beginner,private,168218bc-79ba-4142-adfd-4b9957c66bad,4,2025-04-25
+5c2974fe-1278-4ca4-9916-f058e69c9f7a,football,East Side Courts,Milwaukee,East Side,43.04944,-87.9591,0,18,45,5.0,all,public,f8db6b81-9787-4ff0-9844-412a180f5807,16,2024-10-21
+870c9dcc-8427-440d-8c76-c28193e9ae49,football,Pilsen Courts,Chicago,Pilsen,41.84215,-87.59776,5,19,60,0.0,intermediate,public,05f09471-c7e3-4751-933c-fd212311cbe2,6,2024-11-09
+f9473f9e-e850-4309-a11b-9ea43a60a7c2,volleyball,Riverside Courts,Milwaukee,Riverside,43.01361,-87.92829,3,8,90,10.0,all,public,56af8eae-fbed-4b3e-a5bb-a723f1a8f7f0,8,2024-04-11
+80d36b3c-f4b9-4be2-9f5e-4bf590a0aef9,tennis,Eastern Market Courts,Detroit,Eastern Market,42.34237,-83.02304,0,20,60,3.0,advanced,public,11488957-1d7f-4a68-850b-f6e654c1d83a,10,2024-10-07
+ae3796a2-e795-4f1f-99b7-d6943a8137ee,badminton,Wingra Courts,Madison,Wingra,43.0874,-89.39383,0,10,60,0.0,advanced,public,b5f5a348-95a1-42e4-abd5-2346ab5abadd,6,2024-06-10
+1feffa8d-e0a9-4544-b7c9-6ece1b16d5fd,tennis,Isthmus Courts,Madison,Isthmus,43.1098,-89.45109,0,18,45,5.0,beginner,public,eacb4269-f3af-49c8-922c-3dca105d3ce4,10,2025-06-09
+39b5a19a-ee85-41a6-be99-5c0f0ed58cfb,basketball,Wicker Park Courts,Chicago,Wicker Park,41.91552,-87.62755,5,9,60,7.0,all,public,e2d32fdc-a215-4763-b35b-cdeded188400,16,2025-02-01
+5b99f202-06e3-4565-a8ae-a18cccbb0839,soccer,Tenney-Lapham Courts,Madison,Tenney-Lapham,43.10263,-89.3678,3,17,60,0.0,beginner,public,d5b70b10-c984-4886-9c52-58a0e43aa501,4,2024-11-28
+d7c0e24d-6689-421b-979a-ae3197678059,tennis,East Side Courts,Milwaukee,East Side,43.01799,-87.89547,6,9,120,7.0,beginner,public,ec2275cc-58ba-4fe1-a82e-0774e17f3b26,8,2025-02-23
+2ed04070-69c8-456f-9420-b8d644d223d8,soccer,Vilas Courts,Madison,Vilas,43.0567,-89.40323,5,20,90,10.0,intermediate,public,0be068b1-b8db-4a97-9274-74ce843ed428,16,2025-01-18
+493b37e2-33b0-4a88-90fd-b16098c6cf8f,basketball,Lincoln Park Courts,Chicago,Lincoln Park,41.91297,-87.64368,1,10,120,10.0,intermediate,private,2693a9c8-23e7-4c1f-9e0d-79ec31aacad4,4,2025-03-11
+743e7849-25ab-4f0d-a74a-8d9a09fe558f,basketball,Seward Courts,Minneapolis,Seward,44.9465,-93.26261,5,10,90,7.0,advanced,public,075edbd1-b02f-41e8-b2b3-ca8a895102df,6,2025-03-15
+0cbe4453-9a52-4f2d-b6c3-a3d39d65a401,football,Bay View Courts,Milwaukee,Bay View,43.07571,-87.87801,1,19,90,0.0,intermediate,public,ba3b9385-8ea9-4141-a059-0a0f40972ee9,4,2025-03-11
+ff687fa5-83de-45ab-becc-3d65868673b9,hockey,Seward Courts,Minneapolis,Seward,44.97126,-93.26368,1,17,60,0.0,advanced,private,d07c1f2b-aea8-4634-b4e5-ab3f0e67f507,4,2024-03-19
+6a55745a-ce6e-4036-91ba-08f2abba5d6c,tennis,Walker's Point Courts,Milwaukee,Walker's Point,43.03917,-87.86262,4,19,90,15.0,beginner,private,80721aa5-a9cb-4e7f-8eec-5df020119626,6,2024-01-12
+a7397b11-1631-444f-b5d4-b25ec4453ece,hockey,Pilsen Courts,Chicago,Pilsen,41.90474,-87.64305,0,17,120,10.0,advanced,private,c2ff142b-6fd0-4fbc-a53f-f7d29f31f5d5,8,2024-01-01
+5153e2ee-667b-47d8-9beb-7593edff8ddc,basketball,Wicker Park Courts,Chicago,Wicker Park,41.86756,-87.6329,4,10,60,2.0,advanced,public,81bfad42-b900-4ad3-9b2c-b94612e06e14,4,2024-01-19
+0e200955-35e4-44c4-8702-65368595dc52,baseball,Midtown Courts,Minneapolis,Midtown,44.93557,-93.24075,2,10,45,2.0,beginner,public,6822eb4c-2fe3-44fb-a6a3-b23a739f10d9,6,2025-03-05
+e19d4c5d-641d-4687-ad46-f3cf55d4484a,hockey,Bay View Courts,Milwaukee,Bay View,43.01638,-87.90184,2,9,60,0.0,intermediate,private,e61218ff-ce7f-44ac-8756-66aaf2ddda13,16,2024-08-14
+d9078dab-09c2-488b-aab5-aa8f044fcd6c,volleyball,Wicker Park Courts,Chicago,Wicker Park,41.87576,-87.62001,1,7,60,5.0,advanced,public,75504784-17e6-41d3-acca-7de2da00b3a2,16,2024-01-30
+e36b270f-f4c9-42f6-904b-4fd2176f342a,rugby,Logan Square Courts,Chicago,Logan Square,41.83946,-87.63574,5,8,45,2.0,all,public,9f195bce-40a3-48d6-913a-24b5de0506ff,16,2025-05-10
