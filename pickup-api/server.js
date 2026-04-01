@@ -4,7 +4,7 @@ const cors       = require("cors");
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors());
 app.use(express.json());
 
 const transporter = nodemailer.createTransport({
@@ -69,4 +69,5 @@ app.post("/verify-code", (req, res) => {
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
-app.listen(8001, () => console.log("Email API running on http://localhost:8001"));
+const PORT = process.env.PORT || 8001;
+app.listen(PORT, () => console.log(`Email API running on port ${PORT}`));
