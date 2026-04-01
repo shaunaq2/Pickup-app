@@ -1,19 +1,12 @@
-const express    = require("express");
-const nodemailer = require("nodemailer");
-const cors       = require("cors");
+const express = require("express");
+const cors    = require("cors");
+const { Resend } = require("resend");
 
-const app = express();
+const app    = express();
+const resend = new Resend("re_Aq92i3aD_N5LzPiZjCa2h47ycSUNXFEgj");
 
 app.use(cors());
 app.use(express.json());
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "pickupapp.noreply@gmail.com",
-    pass: "lwvljfhcphwswfbk",
-  },
-});
 
 const codes = {};
 
@@ -25,8 +18,8 @@ app.post("/send-code", async (req, res) => {
   codes[email] = { code, expires: Date.now() + 10 * 60 * 1000 };
 
   try {
-    await transporter.sendMail({
-      from:    '"PickUp" <pickupapp.noreply@gmail.com>',
+    await resend.emails.send({
+      from:    "PickUp <onboarding@resend.dev>",
       to:      email,
       subject: "Your PickUp verification code",
       html: `
@@ -50,7 +43,7 @@ app.post("/send-code", async (req, res) => {
     console.log(`Code sent to ${email}`);
     res.json({ success: true });
   } catch (err) {
-    console.error("Gmail error:", err.message);
+    console.error("Resend error:", err.message);
     res.status(500).json({ error: "Failed to send email", detail: err.message });
   }
 });
