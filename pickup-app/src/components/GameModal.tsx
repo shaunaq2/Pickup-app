@@ -49,6 +49,7 @@ export default function GameModal({
   const waitlistFull = game.waitlist.length >= game.waitlistMax;
   const deadline     = withdrawalDeadline(game.date, game.time);
   const canUnhost = isHost && game.players.every((p) => p === game.host);
+  console.log("DEBUG:", { isHost, players: game.players, host: game.host, canUnhost });
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

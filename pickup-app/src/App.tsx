@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Game, TabId, Notification, NotifType, User, WalletTx } from "./types";
 import { BookingRecord } from "./data/history";
 import { gameToBookingRecord } from "./utils/recommend";
@@ -72,6 +72,9 @@ export default function App() {
   const [transactions, setTransactions]   = useState<WalletTx[]>([]);
   const [hostGameIds, setHostGameIds]     = useState<Set<number>>(new Set());
 
+  const userRef = useRef<User | null>(null);
+  userRef.current = user;
+
   async function loadUserGameState(username: string) {
     const [{ data: playerRows }, { data: requestRows }, { data: waitlistRows }] = await Promise.all([
       supabase.from("game_players").select("game_id").eq("username", username),
@@ -96,7 +99,37 @@ export default function App() {
     if (username) await loadUserGameState(username);
   }, []);
 
+  // Initial load
   useEffect(() => { refreshGames(); }, [refreshGames]);
+
+  // Supabase Realtime — auto-refresh when DB changes
+  useEffect(() => {
+    const channel = supabase
+      .channel("db-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "games" }, () => {
+        const u = userRef.current;
+        if (u) refreshGames(false, u.username);
+        else refreshGames();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "game_players" }, () => {
+        const u = userRef.current;
+        if (u) refreshGames(false, u.username);
+        else refreshGames();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "join_requests" }, () => {
+        const u = userRef.current;
+        if (u) refreshGames(false, u.username);
+        else refreshGames();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "waitlist" }, () => {
+        const u = userRef.current;
+        if (u) refreshGames(false, u.username);
+        else refreshGames();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [refreshGames]);
 
   function resetForNewSession() {
     setTab("browse");
@@ -194,7 +227,6 @@ export default function App() {
       addTx("refund", game.costPerPlayer, `Left ${game.sport} at ${game.location}`);
     }
     await supabase.from("game_players").delete().eq("game_id", id).eq("username", user!.username);
-    // Clean up join request so user can re-request later
     await supabase.from("join_requests").delete().eq("game_id", id).eq("username", user!.username);
     setJoinedIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
     setRequestedIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
