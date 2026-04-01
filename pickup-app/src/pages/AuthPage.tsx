@@ -9,7 +9,7 @@ interface Props {
 type Mode = "login" | "signup";
 type SignupStep = "details" | "verify" | "password" | "done";
 
-const EMAIL_API = "http://localhost:8001";
+const EMAIL_API = "https://pickup-api-n8uj.onrender.com";
 
 function validatePassword(p: string): string | null {
   if (p.length < 7)        return "At least 7 characters";
@@ -218,7 +218,7 @@ export default function AuthPage({ onAuth }: Props) {
 
     setLoading(false);
 
-    if (!data)                   return setError("Account not found");
+    if (!data)                    return setError("Account not found");
     if (data.password_hash !== p) return setError("Wrong password");
     onAuth({ username: u });
   }
