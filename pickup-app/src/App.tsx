@@ -75,6 +75,14 @@ export default function App() {
   const userRef = useRef<User | null>(null);
   userRef.current = user;
 
+  // Keep Render email API alive
+  useEffect(() => {
+    const ping = () => fetch("https://pickup-api-n8uj.onrender.com/health").catch(() => {});
+    ping();
+    const interval = setInterval(ping, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   async function loadUserGameState(username: string) {
     const [{ data: playerRows }, { data: requestRows }, { data: waitlistRows }] = await Promise.all([
       supabase.from("game_players").select("game_id").eq("username", username),
@@ -99,10 +107,9 @@ export default function App() {
     if (username) await loadUserGameState(username);
   }, []);
 
-  // Initial load
   useEffect(() => { refreshGames(); }, [refreshGames]);
 
-  // Supabase Realtime — auto-refresh when DB changes
+  // Supabase Realtime
   useEffect(() => {
     const channel = supabase
       .channel("db-changes")
