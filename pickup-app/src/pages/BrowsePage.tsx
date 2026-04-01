@@ -49,14 +49,14 @@ function activeFilterCount(f: SearchFilters): number {
 export default function BrowsePage({
   games, joinedIds, requestedIds, leftIds, waitlistedIds, balance, username, liveHistory, isHost,
   onJoin, onLeave, onRequest, onCancel, onJoinWaitlist, onLeaveWaitlist, onApprove, onDeny, onGoToWallet,
-  onRefresh, refreshing,
+  onUnhost, onRefresh, refreshing,
 }: Props) {
-  const [filters, setFilters]       = useState<SearchFilters>(DEFAULT_FILTERS);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [modalId, setModalId]       = useState<number | null>(null);
+  const [filters, setFilters]           = useState<SearchFilters>(DEFAULT_FILTERS);
+  const [drawerOpen, setDrawerOpen]     = useState(false);
+  const [modalId, setModalId]           = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<"idle"|"requesting"|"granted"|"denied">("idle");
-  const [scored, setScored] = useState<ScoredGame[]>([]);
+  const [scored, setScored]             = useState<ScoredGame[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,7 +74,9 @@ export default function BrowsePage({
   }, [username, games, joinedIds, leftIds, liveHistory]);
 
   const filtered = useMemo(() => {
-    let result = [...games];
+    const today = new Date().toISOString().split("T")[0];
+    let result = [...games].filter((g) => g.date >= today);
+
     if (filters.query.trim()) {
       const q = filters.query.toLowerCase();
       result = result.filter(
@@ -198,7 +200,7 @@ export default function BrowsePage({
       {filtered.length === 0 ? (
         <div className="empty">
           <div className="empty-icon">🔍</div>
-          No games match your filters.
+          No upcoming games.
           <br />
           <span className="empty-link" onClick={() => setFilters(DEFAULT_FILTERS)}>
             Clear all filters
@@ -216,6 +218,7 @@ export default function BrowsePage({
             balance={balance}
             onOpen={setModalId}
             onToggleJoin={(id) => handleToggleJoin(id, g)}
+            onUnhost={onUnhost}
           />
         ))
       )}
@@ -262,6 +265,7 @@ export default function BrowsePage({
           onApprove={(name) => onApprove(activeGame.id, name)}
           onDeny={(name) => onDeny(activeGame.id, name)}
           onGoToWallet={onGoToWallet}
+          onUnhost={() => onUnhost(activeGame.id)}
           onClose={() => setModalId(null)}
         />
       )}
