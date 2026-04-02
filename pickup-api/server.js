@@ -19,7 +19,7 @@ app.post("/send-code", async (req, res) => {
 
   try {
     await resend.emails.send({
-      from:    "PickUp <onboarding@resend.dev>",
+      from:    "PickUp <noreply@playrunit.com>",
       to:      email,
       subject: "Your PickUp verification code",
       html: `
