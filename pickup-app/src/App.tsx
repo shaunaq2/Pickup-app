@@ -10,6 +10,7 @@ import NotificationsPage from "./pages/NotificationsPage";
 import WalletPage from "./pages/WalletPage";
 import SettingsPage from "./pages/SettingsPage";
 import AuthPage from "./pages/AuthPage";
+import FriendsPage from "./pages/FriendsPage";
 import "./App.css";
 
 let nextNotifId = 1;
@@ -98,16 +99,82 @@ export default function App() {
     setWaitlistedIds(new Set((waitlistRows ?? []).map((r: any) => r.game_id)));
   }
 
+  // Poll for friend requests and game invites and surface as notifications
+  async function loadSocialNotifs(username: string) {
+    const [{ data: friendReqs }, { data: gameInvites }] = await Promise.all([
+      supabase
+        .from("friendships")
+        .select("*")
+        .eq("recipient", username)
+        .eq("status", "pending"),
+      supabase
+        .from("game_invites")
+        .select("*, games(sport, location)")
+        .eq("invitee", username)
+        .eq("status", "pending"),
+    ]);
+
+    const newNotifs: Notification[] = [];
+
+    for (const req of friendReqs ?? []) {
+      newNotifs.push({
+        id: nextNotifId++,
+        type: "friend_request",
+        gameId: 0,
+        gameSport: "",
+        gameLocation: "",
+        playerName: req.requester,
+        timestamp: new Date(req.created_at),
+        read: false,
+      });
+    }
+
+    for (const inv of gameInvites ?? []) {
+      newNotifs.push({
+        id: nextNotifId++,
+        type: "game_invite",
+        gameId: inv.game_id,
+        gameSport: inv.games?.sport ?? "",
+        gameLocation: inv.games?.location ?? "",
+        playerName: inv.inviter,
+        timestamp: new Date(inv.created_at),
+        read: false,
+      });
+    }
+
+    if (newNotifs.length > 0) {
+      setNotifications((prev) => {
+        // Don't duplicate — check by type+playerName+gameId
+        const filtered = newNotifs.filter(
+          (n) => !prev.some(
+            (p) => p.type === n.type && p.playerName === n.playerName && p.gameId === n.gameId
+          )
+        );
+        return [...filtered, ...prev];
+      });
+    }
+  }
+
   const refreshGames = useCallback(async (showSpinner = false, username?: string) => {
     if (showSpinner) setRefreshing(true);
     const all = await fetchAllGames();
     setGames(all);
     setLoading(false);
     if (showSpinner) setRefreshing(false);
-    if (username) await loadUserGameState(username);
+    if (username) {
+      await loadUserGameState(username);
+      await loadSocialNotifs(username);
+    }
   }, []);
 
   useEffect(() => { refreshGames(); }, [refreshGames]);
+
+  // Poll social notifs every 30s
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => loadSocialNotifs(user.username), 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Supabase Realtime
   useEffect(() => {
@@ -133,6 +200,14 @@ export default function App() {
         if (u) refreshGames(false, u.username);
         else refreshGames();
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "friendships" }, () => {
+        const u = userRef.current;
+        if (u) loadSocialNotifs(u.username);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "game_invites" }, () => {
+        const u = userRef.current;
+        if (u) loadSocialNotifs(u.username);
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -155,6 +230,7 @@ export default function App() {
     resetForNewSession();
     setUser(u);
     await Promise.all([refreshGames(), loadUserGameState(u.username)]);
+    await loadSocialNotifs(u.username);
   }
 
   function handleLogout() {
@@ -224,6 +300,9 @@ export default function App() {
     setJoinedIds((prev) => new Set(prev).add(id));
     setLiveHistory((prev) => [...prev, gameToBookingRecord(game)]);
     if (!isHost(id)) addNotif("you_joined", id, game.sport, game.location, user!.username);
+    // Mark any invite for this game as accepted
+    await supabase.from("game_invites").update({ status: "accepted" })
+      .eq("game_id", id).eq("invitee", user!.username);
     await refreshGames();
   }
 
@@ -355,6 +434,7 @@ export default function App() {
     { id: "browse",        label: "Browse",   icon: <BrowseIcon /> },
     { id: "post",          label: "Post",     icon: <PostIcon /> },
     { id: "mine",          label: "My games", icon: <MyIcon /> },
+    { id: "friends",       label: "Friends",  icon: <FriendsIcon /> },
     { id: "notifications", label: "Inbox",    icon: <NotifIcon /> },
     { id: "wallet",        label: "Settings", icon: <SettingsIcon /> },
   ];
@@ -395,6 +475,7 @@ export default function App() {
           {tab === "browse"        && <BrowsePage {...sharedGameProps} />}
           {tab === "post"          && <PostPage onPost={addGame} onSuccess={() => setTab("browse")} username={user.username} />}
           {tab === "mine"          && <MyGamesPage {...sharedGameProps} />}
+          {tab === "friends"       && <FriendsPage username={user.username} />}
           {tab === "notifications" && (
             <NotificationsPage notifications={notifications} onMarkRead={markRead} onMarkAllRead={markAllRead} />
           )}
@@ -429,6 +510,9 @@ function PostIcon() {
 }
 function MyIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 9h8M8 13h5" /></svg>;
+}
+function FriendsIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="9" cy="7" r="3" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" /><path d="M16 3.13a4 4 0 010 7.75" /><path d="M21 21v-2a4 4 0 00-3-3.85" /></svg>;
 }
 function NotifIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M6 10a6 6 0 0112 0v3l2 3H4l2-3v-3z" /><path d="M10 19a2 2 0 004 0" /></svg>;

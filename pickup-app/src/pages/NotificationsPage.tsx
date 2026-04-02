@@ -26,6 +26,9 @@ function notifIcon(type: Notification["type"]): string {
     case "you_left":         return "👋";
     case "off_waitlist":     return "🎉";
     case "player_joined":    return "👤";
+    case "friend_request":   return "👋";
+    case "friend_accepted":  return "🤝";
+    case "game_invite":      return "📩";
     default:                 return "🔔";
   }
 }
@@ -49,6 +52,12 @@ function notifTitle(n: Notification): string {
       return `Spot opened up! You're now in ${sport} at ${n.gameLocation}`;
     case "player_joined":
       return `${n.playerName} joined your ${sport} game`;
+    case "friend_request":
+      return `${n.playerName} sent you a friend request`;
+    case "friend_accepted":
+      return `${n.playerName} accepted your friend request`;
+    case "game_invite":
+      return `${n.playerName} invited you to ${sport} at ${n.gameLocation}`;
     default:
       return `${sport} at ${n.gameLocation}`;
   }

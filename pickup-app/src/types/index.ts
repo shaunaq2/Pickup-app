@@ -58,7 +58,10 @@ export type NotifType =
   | "you_joined"
   | "you_left"
   | "player_joined"
-  | "off_waitlist";
+  | "off_waitlist"
+  | "friend_request"
+  | "friend_accepted"
+  | "game_invite";
 
 export interface Notification {
   id: number;
@@ -85,4 +88,23 @@ export interface User {
   username: string;
 }
 
-export type TabId = "browse" | "post" | "mine" | "notifications" | "wallet";
+export type TabId = "browse" | "post" | "mine" | "notifications" | "wallet" | "friends";
+
+export type FriendStatus = "none" | "pending_sent" | "pending_received" | "friends";
+
+export interface Friendship {
+  id: number;
+  requester: string;
+  recipient: string;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+}
+
+export interface GameInvite {
+  id: number;
+  game_id: number;
+  inviter: string;
+  invitee: string;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+}

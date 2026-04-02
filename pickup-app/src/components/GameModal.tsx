@@ -4,6 +4,8 @@ import { getSport, formatDate, formatTime, spotsLeft, canWithdraw, withdrawalDea
 import { supabase } from "../lib/supabase";
 import Avatar from "./Avatar";
 
+interface Friend { username: string; }
+
 const SKILL_LABEL: Record<string, string> = {
   all:          "All levels",
   beginner:     "Beginner",
@@ -71,6 +73,10 @@ export default function GameModal({
   const [roomLoading, setRoomLoading]     = useState(false);
   const [extending, setExtending]         = useState(false);
   const [showPrompt, setShowPrompt]       = useState(false);
+  const [friends, setFriends]             = useState<Friend[]>([]);
+  const [invitedIds, setInvitedIds]       = useState<Set<string>>(new Set());
+  const [inviteLoading, setInviteLoading] = useState<string | null>(null);
+  const [showInvite, setShowInvite]       = useState(false);
   const messagesEndRef                    = useRef<HTMLDivElement>(null);
 
   const sport        = getSport(game.sport);
@@ -170,6 +176,44 @@ export default function GameModal({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose, leaveConfirm, unhostConfirm]);
+
+  // Load friends and existing invites for this game
+  useEffect(() => {
+    if (!canChat && !isHost) return;
+    async function loadFriendsAndInvites() {
+      const [{ data: friendRows }, { data: inviteRows }] = await Promise.all([
+        supabase
+          .from("friendships")
+          .select("requester, recipient")
+          .or(`requester.eq.${username},recipient.eq.${username}`)
+          .eq("status", "accepted"),
+        supabase
+          .from("game_invites")
+          .select("invitee")
+          .eq("game_id", game.id)
+          .eq("inviter", username),
+      ]);
+      const friendList = (friendRows ?? []).map((r) =>
+        r.requester === username ? { username: r.recipient } : { username: r.requester }
+      );
+      // Filter out players already in the game
+      setFriends(friendList.filter((f) => !game.players.includes(f.username)));
+      setInvitedIds(new Set((inviteRows ?? []).map((r) => r.invitee)));
+    }
+    loadFriendsAndInvites();
+  }, [game.id, game.players, username, canChat, isHost]);
+
+  async function sendInvite(toUsername: string) {
+    setInviteLoading(toUsername);
+    await supabase.from("game_invites").upsert({
+      game_id: game.id,
+      inviter: username,
+      invitee: toUsername,
+      status: "pending",
+    }, { onConflict: "game_id,invitee" });
+    setInvitedIds((prev) => new Set(prev).add(toUsername));
+    setInviteLoading(null);
+  }
 
   async function sendMessage() {
     if (!newMessage.trim() || sending || chatExpired) return;
@@ -396,6 +440,63 @@ export default function GameModal({
                           onApprove={() => onApprove(req.name)} onDeny={() => onDeny(req.name)} />
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* Invite friends section — visible to host and joined players */}
+                {(isHost || joined) && friends.length > 0 && (
+                  <div className="modal-section">
+                    <div
+                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}
+                      onClick={() => setShowInvite((v) => !v)}
+                    >
+                      <div className="modal-section-title" style={{ marginBottom: 0 }}>
+                        Invite friends
+                      </div>
+                      <span style={{ fontSize: 13, color: "var(--text-3)" }}>{showInvite ? "▲" : "▼"}</span>
+                    </div>
+
+                    {showInvite && (
+                      <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+                        {friends.map((f) => {
+                          const invited = invitedIds.has(f.username);
+                          return (
+                            <div key={f.username} style={{
+                              display: "flex", alignItems: "center", gap: 10,
+                              padding: "8px 10px", borderRadius: 10,
+                              background: "var(--surface)", border: "1px solid var(--border-mid)",
+                            }}>
+                              <Avatar name={f.username} idx={f.username.charCodeAt(0) % 6} size={30} fontSize={12} />
+                              <div style={{ flex: 1, fontWeight: 600, fontSize: 13, color: "var(--text)" }}>
+                                @{f.username}
+                              </div>
+                              {invited ? (
+                                <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 600 }}>
+                                  ✓ Invited
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => sendInvite(f.username)}
+                                  disabled={inviteLoading === f.username}
+                                  style={{
+                                    padding: "5px 12px", borderRadius: 8, fontSize: 12,
+                                    border: "none", background: "var(--green)",
+                                    color: "#fff", cursor: "pointer", fontWeight: 600,
+                                  }}
+                                >
+                                  {inviteLoading === f.username ? "..." : "Invite"}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {friends.every((f) => game.players.includes(f.username)) && (
+                          <div style={{ fontSize: 12, color: "var(--text-3)", textAlign: "center" }}>
+                            All your friends are already in this game!
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
