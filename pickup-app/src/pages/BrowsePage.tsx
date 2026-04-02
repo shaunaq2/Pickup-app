@@ -255,6 +255,7 @@ export default function BrowsePage({
           isHost={isHost(activeGame.id)}
           hasRequested={requestedIds.has(activeGame.id)}
           balance={balance}
+          username={username}
           onJoin={() => onJoin(activeGame.id)}
           onLeave={() => onLeave(activeGame.id)}
           onRequest={() => onRequest(activeGame.id)}

@@ -14,6 +14,7 @@ interface Props {
   leftIds: Set<number>;
   waitlistedIds: Set<number>;
   balance: number;
+  username: string;
   liveHistory: BookingRecord[];
   isHost: (id: number) => boolean;
   onJoin: (id: number) => void;
@@ -32,7 +33,7 @@ type TopTab = "playing" | "hosting";
 type SubTab = "upcoming" | "past";
 
 export default function MyGamesPage({
-  games, joinedIds, requestedIds, leftIds, waitlistedIds, balance, liveHistory, isHost,
+  games, joinedIds, requestedIds, leftIds, waitlistedIds, balance, username, liveHistory, isHost,
   onJoin, onLeave, onRequest, onCancel, onJoinWaitlist, onLeaveWaitlist, onApprove, onDeny, onGoToWallet, onUnhost,
 }: Props) {
   const [topTab,  setTopTab]  = useState<TopTab>("playing");
@@ -189,6 +190,7 @@ export default function MyGamesPage({
           isHost={isHost(activeGame.id)}
           hasRequested={requestedIds.has(activeGame.id)}
           balance={balance}
+          username={username}
           onJoin={() => onJoin(activeGame.id)}
           onLeave={() => onLeave(activeGame.id)}
           onRequest={() => onRequest(activeGame.id)}
