@@ -382,7 +382,7 @@ export default function App() {
     <div className="phone-shell">
       <div className="app">
         <header className="header">
-          <div className="logo">Pick<em>Up</em></div>
+          <div className="logo">Run<em>It</em></div>
           <div className="header-user">
             <button className="header-avatar-btn" onClick={() => setTab("wallet")} title="Settings">
               <div className="header-avatar">{user.username[0].toUpperCase()}</div>

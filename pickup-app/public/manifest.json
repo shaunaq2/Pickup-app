@@ -1,6 +1,6 @@
 {
-  "short_name": "PickUp",
-  "name": "PickUp — Find your next game",
+  "short_name": "RunIt",
+  "name": "RunIt — Find your next game",
   "description": "Discover and join local pickup sports games near you",
   "start_url": "/",
   "display": "standalone",

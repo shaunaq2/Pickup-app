@@ -122,7 +122,7 @@ export default function AuthPage({ onAuth }: Props) {
     } catch {
       const c = Math.floor(100000 + Math.random() * 900000).toString();
       setGenerated(c);
-      console.log(`[PickUp fallback] Code for ${em}: ${c}`);
+      console.log(`[RunIt fallback] Code for ${em}: ${c}`);
     }
   }
 
@@ -233,7 +233,7 @@ export default function AuthPage({ onAuth }: Props) {
 
   return (
     <div className="auth-screen">
-      <div className="auth-logo">Pick<em>Up</em></div>
+      <div className="auth-logo">Run<em>It</em></div>
       <div className="auth-tagline">Find your next game.</div>
 
       <div className="auth-card">
@@ -387,7 +387,7 @@ export default function AuthPage({ onAuth }: Props) {
           <div className="auth-done">
             <div className="auth-done-icon">🎉</div>
             <div className="auth-done-title">You're all set!</div>
-            <div className="auth-done-sub">Welcome to PickUp, <strong>{username}</strong></div>
+            <div className="auth-done-sub">Welcome to RunIt, <strong>{username}</strong></div>
             <button className="auth-submit" onClick={finishSignup} style={{ marginTop: 20 }}>
               Start playing
             </button>

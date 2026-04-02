@@ -19,17 +19,17 @@ app.post("/send-code", async (req, res) => {
 
   try {
     await resend.emails.send({
-      from:    "PickUp <noreply@playrunit.com>",
+      from:    "RunIt <noreply@playrunit.com>",
       to:      email,
-      subject: "Your PickUp verification code",
+      subject: "Your RunIt verification code",
       html: `
         <div style="font-family:sans-serif;max-width:420px;margin:0 auto;padding:32px">
           <h2 style="margin:0 0 4px">
-            <span style="color:#1D9E75">Pick</span><span style="color:#111">Up</span>
+            <span style="color:#1D9E75">Run</span><span style="color:#111">It</span>
           </h2>
           <p style="color:#666;margin:0 0 24px;font-size:14px">Find your next game.</p>
           <p style="color:#333;margin-bottom:20px">
-            Here's your verification code to create your PickUp account:
+            Here's your verification code to create your RunIt account:
           </p>
           <div style="background:#f5f5f3;border-radius:12px;padding:28px;text-align:center;margin-bottom:24px">
             <span style="font-size:40px;font-weight:800;letter-spacing:12px;color:#111">${code}</span>
