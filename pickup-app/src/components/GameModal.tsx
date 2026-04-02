@@ -19,6 +19,13 @@ interface Message {
   created_at: string;
 }
 
+interface ChatRoom {
+  game_id: number;
+  created_at: string;
+  expires_at: string;
+  kept: boolean;
+}
+
 interface Props {
   game: Game;
   joined: boolean;
@@ -40,6 +47,15 @@ interface Props {
   onUnhost?: () => void;
 }
 
+function formatExpiry(expiresAt: string): string {
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  if (ms <= 0) return "expired";
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  if (h > 0) return `${h}h ${m}m left`;
+  return `${m}m left`;
+}
+
 export default function GameModal({
   game, joined, isHost, hasRequested, balance, waitlisted, username,
   onJoin, onLeave, onRequest, onCancel, onJoinWaitlist, onLeaveWaitlist,
@@ -51,8 +67,10 @@ export default function GameModal({
   const [messages, setMessages]           = useState<Message[]>([]);
   const [newMessage, setNewMessage]       = useState("");
   const [sending, setSending]             = useState(false);
-  const [isTeamChat, setIsTeamChat]       = useState(false);
-  const [savingChat, setSavingChat]       = useState(false);
+  const [room, setRoom]                   = useState<ChatRoom | null>(null);
+  const [roomLoading, setRoomLoading]     = useState(false);
+  const [extending, setExtending]         = useState(false);
+  const [showPrompt, setShowPrompt]       = useState(false);
   const messagesEndRef                    = useRef<HTMLDivElement>(null);
 
   const sport        = getSport(game.sport);
@@ -68,21 +86,52 @@ export default function GameModal({
   const canUnhost    = isHost && game.players.every((p) => p === game.host);
   const canChat      = joined || isHost;
 
-  // Check if this is a saved team chat
-  useEffect(() => {
-    supabase.from("team_chats").select("id").eq("game_id", game.id).maybeSingle()
-      .then(({ data }) => setIsTeamChat(!!data));
-  }, [game.id]);
+  const chatExpired  = room ? (!room.kept && new Date(room.expires_at) < new Date()) : false;
 
-  // Check if chat has expired (24h after game date+time)
-  const gameDateTime = new Date(`${game.date}T${game.time}`);
-  const chatExpiry   = new Date(gameDateTime.getTime() + 24 * 60 * 60 * 1000);
-  const chatExpired  = !isTeamChat && new Date() > chatExpiry;
-
-  // Load messages
+  // Load or create chat room when chat tab opens
   useEffect(() => {
-    if (!canChat || activeTab !== "chat") return;
-    supabase.from("messages").select("*").eq("game_id", game.id)
+    if (activeTab !== "chat" || !canChat) return;
+    let cancelled = false;
+
+    async function initRoom() {
+      setRoomLoading(true);
+      let { data: existingRoom } = await supabase
+        .from("chat_rooms")
+        .select("*")
+        .eq("game_id", game.id)
+        .maybeSingle();
+
+      if (!existingRoom) {
+        const { data: newRoom } = await supabase
+          .from("chat_rooms")
+          .insert({ game_id: game.id })
+          .select()
+          .single();
+        existingRoom = newRoom;
+      }
+
+      if (!cancelled && existingRoom) {
+        setRoom(existingRoom);
+        // Show keep/delete prompt if host and expiring within 1 hour
+        const msLeft = new Date(existingRoom.expires_at).getTime() - Date.now();
+        if (isHost && !existingRoom.kept && msLeft < 3600000) {
+          setShowPrompt(true);
+        }
+      }
+      if (!cancelled) setRoomLoading(false);
+    }
+
+    initRoom();
+    return () => { cancelled = true; };
+  }, [activeTab, game.id, canChat, isHost]);
+
+  // Load messages when chat tab opens
+  useEffect(() => {
+    if (activeTab !== "chat" || !canChat) return;
+    supabase
+      .from("messages")
+      .select("*")
+      .eq("game_id", game.id)
       .order("created_at", { ascending: true })
       .then(({ data }) => setMessages(data ?? []));
   }, [game.id, canChat, activeTab]);
@@ -90,12 +139,16 @@ export default function GameModal({
   // Realtime messages
   useEffect(() => {
     if (!canChat) return;
-    const channel = supabase.channel(`chat-${game.id}`)
+    const channel = supabase
+      .channel(`chat-${game.id}`)
       .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "messages",
         filter: `game_id=eq.${game.id}`,
       }, (payload) => {
-        setMessages((prev) => [...prev, payload.new as Message]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === (payload.new as Message).id)) return prev;
+          return [...prev, payload.new as Message];
+        });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -119,7 +172,7 @@ export default function GameModal({
   }, [onClose, leaveConfirm, unhostConfirm]);
 
   async function sendMessage() {
-    if (!newMessage.trim() || sending) return;
+    if (!newMessage.trim() || sending || chatExpired) return;
     setSending(true);
     await supabase.from("messages").insert({
       game_id: game.id,
@@ -130,14 +183,21 @@ export default function GameModal({
     setSending(false);
   }
 
-  async function saveAsTeamChat() {
-    setSavingChat(true);
-    await supabase.from("team_chats").insert({
-      game_id: game.id,
-      name: `${game.sport} at ${game.location}`,
-    });
-    setIsTeamChat(true);
-    setSavingChat(false);
+  async function handleKeep() {
+    setExtending(true);
+    await supabase.from("chat_rooms").update({ kept: true }).eq("game_id", game.id);
+    setRoom((r) => r ? { ...r, kept: true } : r);
+    setShowPrompt(false);
+    setExtending(false);
+  }
+
+  async function handleDelete() {
+    await supabase.from("messages").delete().eq("game_id", game.id);
+    await supabase.from("chat_rooms").delete().eq("game_id", game.id);
+    setMessages([]);
+    setRoom(null);
+    setShowPrompt(false);
+    setActiveTab("details");
   }
 
   function confirmLeave() {
@@ -415,47 +475,80 @@ export default function GameModal({
 
             {activeTab === "chat" && canChat && (
               <div style={{ display: "flex", flexDirection: "column", height: 340 }}>
-                {/* Chat expiry / team chat banner */}
-                {!isTeamChat && !chatExpired && isHost && (
+
+                {/* Keep / Delete prompt — shows when expiring within 1hr */}
+                {showPrompt && !chatExpired && isHost && (
                   <div style={{
-                    background: "var(--surface)", border: "1px solid var(--border-mid)",
+                    background: "#fff8e1", border: "1px solid #ffe082",
                     borderRadius: 8, padding: "8px 12px", marginBottom: 8,
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
                   }}>
-                    <span style={{ fontSize: 12, color: "var(--text-2)" }}>
-                      ⏳ Chat deletes 24h after game
+                    <span style={{ fontSize: 12, color: "#795548" }}>
+                      ⏳ Chat expires soon — keep it?
                     </span>
-                    <button
-                      onClick={saveAsTeamChat}
-                      disabled={savingChat}
-                      style={{
-                        background: "var(--green)", color: "white", border: "none",
-                        borderRadius: 6, padding: "4px 10px", fontSize: 11,
-                        fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
-                      }}
-                    >
-                      {savingChat ? "Saving..." : "Save as team"}
-                    </button>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <button onClick={handleDelete} style={{
+                        fontSize: 11, padding: "4px 9px", borderRadius: 6,
+                        border: "1px solid #ef9a9a", background: "#fff",
+                        color: "#c62828", cursor: "pointer",
+                      }}>Delete</button>
+                      <button onClick={handleKeep} disabled={extending} style={{
+                        fontSize: 11, padding: "4px 9px", borderRadius: 6,
+                        border: "none", background: "var(--green)",
+                        color: "#fff", cursor: "pointer", fontWeight: 600,
+                      }}>{extending ? "..." : "Keep"}</button>
+                    </div>
                   </div>
                 )}
 
-                {isTeamChat && (
+                {/* Kept badge */}
+                {room?.kept && (
                   <div style={{
                     background: "#1a3a2a", borderRadius: 8, padding: "6px 12px",
                     marginBottom: 8, fontSize: 12, color: "var(--green)", fontWeight: 600,
                   }}>
-                    ✅ Team chat — messages saved forever
+                    ✅ Chat saved — messages kept forever
                   </div>
                 )}
 
+                {/* Expiry timer */}
+                {room && !room.kept && !chatExpired && (
+                  <div style={{
+                    fontSize: 11, color: "var(--text-3)", textAlign: "right",
+                    marginBottom: 6, paddingRight: 2,
+                  }}>
+                    ⏱ {formatExpiry(room.expires_at)}
+                  </div>
+                )}
+
+                {/* Expired state */}
                 {chatExpired ? (
                   <div style={{
                     flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-                    flexDirection: "column", gap: 8, color: "var(--text-3)",
+                    flexDirection: "column", gap: 8,
                   }}>
-                    <span style={{ fontSize: 24 }}>💬</span>
-                    <span style={{ fontSize: 13 }}>Chat has expired</span>
-                    <span style={{ fontSize: 11 }}>Messages are deleted 24h after the game</span>
+                    <span style={{ fontSize: 28 }}>💬</span>
+                    <span style={{ fontSize: 13, color: "var(--text-2)", fontWeight: 600 }}>Chat has expired</span>
+                    <span style={{ fontSize: 11, color: "var(--text-3)" }}>Messages are deleted 24h after creation</span>
+                    {isHost && (
+                      <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                        <button onClick={handleDelete} style={{
+                          fontSize: 12, padding: "6px 12px", borderRadius: 8,
+                          border: "1px solid var(--border-mid)", background: "var(--surface)",
+                          color: "var(--text-2)", cursor: "pointer",
+                        }}>Clear chat</button>
+                        <button onClick={handleKeep} style={{
+                          fontSize: 12, padding: "6px 12px", borderRadius: 8,
+                          border: "none", background: "var(--green)",
+                          color: "#fff", cursor: "pointer", fontWeight: 600,
+                        }}>Keep chat</button>
+                      </div>
+                    )}
+                  </div>
+                ) : roomLoading ? (
+                  <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "var(--text-3)", fontSize: 13 }}>
+                    Loading...
                   </div>
                 ) : (
                   <>
