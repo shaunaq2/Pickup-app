@@ -88,7 +88,7 @@ export interface User {
   username: string;
 }
 
-export type TabId = "browse" | "post" | "mine" | "notifications" | "wallet" | "friends";
+export type TabId = "browse" | "post" | "mine" | "notifications" | "wallet" | "friends" | "chats";
 
 export type FriendStatus = "none" | "pending_sent" | "pending_received" | "friends";
 

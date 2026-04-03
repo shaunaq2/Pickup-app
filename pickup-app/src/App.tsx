@@ -12,6 +12,7 @@ import SettingsPage from "./pages/SettingsPage";
 import AuthPage from "./pages/AuthPage";
 import FriendsPage from "./pages/FriendsPage";
 import ChatPage from "./pages/ChatPage";
+import ChatsPage from "./pages/ChatsPage";
 import "./App.css";
 
 let nextNotifId = 1;
@@ -436,7 +437,7 @@ export default function App() {
     { id: "browse",        label: "Browse",   icon: <BrowseIcon /> },
     { id: "post",          label: "Post",     icon: <PostIcon /> },
     { id: "mine",          label: "My games", icon: <MyIcon /> },
-    { id: "friends",       label: "Friends",  icon: <FriendsIcon /> },
+    { id: "chats",         label: "Chats",    icon: <ChatsIcon /> },
     { id: "notifications", label: "Inbox",    icon: <NotifIcon /> },
     { id: "wallet",        label: "Settings", icon: <SettingsIcon /> },
   ];
@@ -478,6 +479,7 @@ export default function App() {
           {tab === "post"          && <PostPage onPost={addGame} onSuccess={() => setTab("browse")} username={user.username} />}
           {tab === "mine"          && <MyGamesPage {...sharedGameProps} />}
           {tab === "friends"       && <FriendsPage username={user.username} />}
+          {tab === "chats"         && <ChatsPage games={games} username={user.username} joinedIds={joinedIds} isHost={isHost} />}
           {tab === "notifications" && (
             notifChatGameId ? (
               (() => {
@@ -542,6 +544,9 @@ function PostIcon() {
 }
 function MyIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 9h8M8 13h5" /></svg>;
+}
+function ChatsIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>;
 }
 function FriendsIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="9" cy="7" r="3" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" /><path d="M16 3.13a4 4 0 010 7.75" /><path d="M21 21v-2a4 4 0 00-3-3.85" /></svg>;
