@@ -11,6 +11,7 @@ import WalletPage from "./pages/WalletPage";
 import SettingsPage from "./pages/SettingsPage";
 import AuthPage from "./pages/AuthPage";
 import FriendsPage from "./pages/FriendsPage";
+import ChatPage from "./pages/ChatPage";
 import "./App.css";
 
 let nextNotifId = 1;
@@ -60,6 +61,7 @@ async function fetchAllGames(): Promise<Game[]> {
 export default function App() {
   const [user, setUser]                   = useState<User | null>(null);
   const [tab, setTab]                     = useState<TabId>("browse");
+  const [notifChatGameId, setNotifChatGameId] = useState<number | null>(null);
   const [games, setGames]                 = useState<Game[]>([]);
   const [loading, setLoading]             = useState(true);
   const [refreshing, setRefreshing]       = useState(false);
@@ -477,7 +479,37 @@ export default function App() {
           {tab === "mine"          && <MyGamesPage {...sharedGameProps} />}
           {tab === "friends"       && <FriendsPage username={user.username} />}
           {tab === "notifications" && (
-            <NotificationsPage notifications={notifications} onMarkRead={markRead} onMarkAllRead={markAllRead} />
+            notifChatGameId ? (
+              (() => {
+                const chatGame = games.find((g) => g.id === notifChatGameId);
+                if (!chatGame) return null;
+                return <ChatPage game={chatGame} username={user.username} isHost={isHost(notifChatGameId)} onBack={() => setNotifChatGameId(null)} />;
+              })()
+            ) : (
+              <NotificationsPage
+                notifications={notifications}
+                games={games}
+                joinedIds={joinedIds}
+                requestedIds={requestedIds}
+                waitlistedIds={waitlistedIds}
+                balance={balance}
+                username={user.username}
+                isHost={isHost}
+                onMarkRead={markRead}
+                onMarkAllRead={markAllRead}
+                onJoin={joinGame}
+                onLeave={leaveGame}
+                onRequest={requestJoin}
+                onCancel={cancelRequest}
+                onJoinWaitlist={joinWaitlist}
+                onLeaveWaitlist={leaveWaitlist}
+                onApprove={approveRequest}
+                onDeny={denyRequest}
+                onGoToWallet={() => setTab("wallet")}
+                onUnhost={deleteGame}
+                onOpenChat={(id) => setNotifChatGameId(id)}
+              />
+            )
           )}
           {tab === "wallet" && (
             <SettingsPage user={user} balance={balance} transactions={transactions} onTopUp={topUp} onLogout={handleLogout} />
