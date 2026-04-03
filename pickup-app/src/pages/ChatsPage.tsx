@@ -7,6 +7,7 @@ import ChatPage from "./ChatPage";
 
 interface ChatRoom {
   game_id: number;
+  created_at: string;
   expires_at: string;
   kept: boolean;
 }
