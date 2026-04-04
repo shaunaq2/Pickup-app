@@ -8,6 +8,7 @@ import GameModal from "../components/GameModal";
 import SearchBar from "../components/SearchBar";
 import FilterDrawer from "../components/FilterDrawer";
 import RecommendedSection from "../components/RecommendedSection";
+import ChatPage from "./ChatPage";
 
 interface Props {
   games: Game[];
@@ -57,6 +58,7 @@ export default function BrowsePage({
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<"idle"|"requesting"|"granted"|"denied">("idle");
   const [scored, setScored]             = useState<ScoredGame[]>([]);
+  const [chatGameId, setChatGameId]     = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,7 +69,7 @@ export default function BrowsePage({
       (r) => !joinedGameHistory.some((j) => j.gameId === r.gameId)
     );
     const fullHistory = [...joinedGameHistory, ...liveOnlyNew];
-    scoreGamesAsync(username, games, joinedIds, leftIds, fullHistory).then((results) => {
+    scoreGamesAsync(username, games, joinedIds, fullHistory).then((results) => {
       if (!cancelled) setScored(results);
     });
     return () => { cancelled = true; };
@@ -106,7 +108,19 @@ export default function BrowsePage({
   }, [games, filters, userLocation]);
 
   const activeGame = games.find((g) => g.id === modalId) ?? null;
+  const chatGame   = games.find((g) => g.id === chatGameId) ?? null;
   const numActive  = activeFilterCount(filters);
+
+  if (chatGame) {
+    return (
+      <ChatPage
+        game={chatGame}
+        username={username}
+        isHost={isHost(chatGame.id)}
+        onBack={() => setChatGameId(null)}
+      />
+    );
+  }
   const showRec    = scored.length > 0 && numActive === 0 && !filters.query.trim();
 
   function handleToggleJoin(id: number, game: Game) {
@@ -268,6 +282,7 @@ export default function BrowsePage({
           onGoToWallet={onGoToWallet}
           onUnhost={() => onUnhost(activeGame.id)}
           onClose={() => setModalId(null)}
+          onOpenChat={() => { setModalId(null); setChatGameId(activeGame.id); }}
         />
       )}
     </>
