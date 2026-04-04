@@ -5,7 +5,6 @@ import { scoreGamesAsync, ScoredGame, gameToBookingRecord } from "../utils/recom
 import { BookingRecord } from "../data/history";
 import GameCard from "../components/GameCard";
 import GameModal from "../components/GameModal";
-import ChatPage from "./ChatPage";
 import SearchBar from "../components/SearchBar";
 import FilterDrawer from "../components/FilterDrawer";
 import RecommendedSection from "../components/RecommendedSection";
@@ -55,7 +54,6 @@ export default function BrowsePage({
   const [filters, setFilters]           = useState<SearchFilters>(DEFAULT_FILTERS);
   const [drawerOpen, setDrawerOpen]     = useState(false);
   const [modalId, setModalId]           = useState<number | null>(null);
-  const [chatGameId, setChatGameId]     = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<"idle"|"requesting"|"granted"|"denied">("idle");
   const [scored, setScored]             = useState<ScoredGame[]>([]);
@@ -69,7 +67,7 @@ export default function BrowsePage({
       (r) => !joinedGameHistory.some((j) => j.gameId === r.gameId)
     );
     const fullHistory = [...joinedGameHistory, ...liveOnlyNew];
-    scoreGamesAsync(username, games, joinedIds, fullHistory).then((results) => {
+    scoreGamesAsync(username, games, joinedIds, leftIds, fullHistory).then((results) => {
       if (!cancelled) setScored(results);
     });
     return () => { cancelled = true; };
@@ -78,6 +76,7 @@ export default function BrowsePage({
   const filtered = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
     let result = [...games].filter((g) => g.date >= today);
+
     if (filters.query.trim()) {
       const q = filters.query.toLowerCase();
       result = result.filter(
@@ -107,21 +106,8 @@ export default function BrowsePage({
   }, [games, filters, userLocation]);
 
   const activeGame = games.find((g) => g.id === modalId) ?? null;
-  const chatGame   = games.find((g) => g.id === chatGameId) ?? null;
   const numActive  = activeFilterCount(filters);
   const showRec    = scored.length > 0 && numActive === 0 && !filters.query.trim();
-
-  // Open chat full-screen
-  if (chatGame) {
-    return (
-      <ChatPage
-        game={chatGame}
-        username={username}
-        isHost={isHost(chatGame.id)}
-        onBack={() => setChatGameId(null)}
-      />
-    );
-  }
 
   function handleToggleJoin(id: number, game: Game) {
     if (joinedIds.has(id)) return onLeave(id);
@@ -149,14 +135,21 @@ export default function BrowsePage({
           disabled={refreshing}
           title="Refresh games"
           style={{
-            flexShrink: 0, width: 38, height: 38, borderRadius: 10,
-            border: "1.5px solid var(--border-mid)", background: "var(--surface)",
-            color: "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center",
-            cursor: refreshing ? "not-allowed" : "pointer", fontSize: 18,
+            flexShrink: 0,
+            width: 38, height: 38,
+            borderRadius: 10,
+            border: "1.5px solid var(--border-mid)",
+            background: "var(--surface)",
+            color: "var(--text-2)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: refreshing ? "not-allowed" : "pointer",
+            fontSize: 18,
             transition: "transform 0.3s",
             transform: refreshing ? "rotate(180deg)" : "rotate(0deg)",
           }}
-        >↺</button>
+        >
+          ↺
+        </button>
       </div>
 
       {numActive > 0 && (
@@ -209,7 +202,9 @@ export default function BrowsePage({
           <div className="empty-icon">🔍</div>
           No upcoming games.
           <br />
-          <span className="empty-link" onClick={() => setFilters(DEFAULT_FILTERS)}>Clear all filters</span>
+          <span className="empty-link" onClick={() => setFilters(DEFAULT_FILTERS)}>
+            Clear all filters
+          </span>
         </div>
       ) : (
         filtered.map((g) => (
@@ -237,10 +232,16 @@ export default function BrowsePage({
           userLocation={userLocation}
           locationStatus={locationStatus}
           onRequestLocation={() => {
-            if (!navigator.geolocation) { setLocationStatus("denied"); return; }
+            if (!navigator.geolocation) {
+              setLocationStatus("denied");
+              return;
+            }
             setLocationStatus("requesting");
             navigator.geolocation.getCurrentPosition(
-              (pos) => { setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocationStatus("granted"); },
+              (pos) => {
+                setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                setLocationStatus("granted");
+              },
               () => setLocationStatus("denied")
             );
           }}
@@ -267,7 +268,6 @@ export default function BrowsePage({
           onGoToWallet={onGoToWallet}
           onUnhost={() => onUnhost(activeGame.id)}
           onClose={() => setModalId(null)}
-          onOpenChat={() => { setModalId(null); setChatGameId(activeGame.id); }}
         />
       )}
     </>

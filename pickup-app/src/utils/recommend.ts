@@ -9,8 +9,6 @@ export interface ScoredGame {
 
 const API_URL = "http://localhost:8000/recommend";
 
-// ─── Helpers ──────────────────────────────────────────────
-
 function dayOfWeekFromDate(dateStr: string): number {
   return new Date(dateStr + "T00:00:00").getDay();
 }
@@ -42,14 +40,6 @@ function hourCloseness(histHours: number[], gameHour: number): number {
   return Math.max(0, 1 - Math.abs(avg - gameHour) / 6);
 }
 
-// ─── Adaptive weight computation ──────────────────────────
-//
-// For each dimension we measure how "consistent" the user is.
-// Consistency = low uniqueRatio or low stdDev = they have a strong preference.
-// We boost weights for dimensions where they're consistent,
-// and reduce weights where they're all over the place.
-// Final weights are always normalised to sum to 1.0.
-
 interface Weights {
   sport: number;
   host: number;
@@ -61,7 +51,6 @@ interface Weights {
 
 function computeAdaptiveWeights(history: BookingRecord[]): Weights {
   if (history.length < 3) {
-    // Not enough data — use sensible defaults
     return { sport: 0.30, host: 0.20, location: 0.18, dayOfWeek: 0.14, hourOfDay: 0.10, skillLevel: 0.08 };
   }
 
@@ -72,7 +61,6 @@ function computeAdaptiveWeights(history: BookingRecord[]): Weights {
   const histHours     = history.map((h) => h.hourOfDay);
   const histSkills    = history.map((h) => h.skillLevel);
 
-  // Consistency scores: 1 = very consistent (always same value), 0 = totally random
   const sportConsistency    = 1 - uniqueRatio(histSports);
   const hostConsistency     = 1 - uniqueRatio(histHosts);
   const locationConsistency = 1 - uniqueRatio(histLocations);
@@ -80,76 +68,55 @@ function computeAdaptiveWeights(history: BookingRecord[]): Weights {
   const hourConsistency     = 1 - Math.min(stdDev(histHours) / 4.0, 1);
   const skillConsistency    = 1 - uniqueRatio(histSkills);
 
-  // Base weights (minimum floor so nothing drops to 0)
   const BASE = { sport: 0.10, host: 0.06, location: 0.06, dayOfWeek: 0.06, hourOfDay: 0.06, skillLevel: 0.04 };
 
-  // Raw adaptive weight = base + consistency bonus
   const raw = {
-    sport:     BASE.sport     + sportConsistency    * 0.30,
-    host:      BASE.host      + hostConsistency     * 0.24,
-    location:  BASE.location  + locationConsistency * 0.20,
-    dayOfWeek: BASE.dayOfWeek + dayConsistency      * 0.16,
-    hourOfDay: BASE.hourOfDay + hourConsistency     * 0.14,
-    skillLevel: BASE.skillLevel + skillConsistency  * 0.10,
+    sport:      BASE.sport     + sportConsistency    * 0.30,
+    host:       BASE.host      + hostConsistency     * 0.24,
+    location:   BASE.location  + locationConsistency * 0.20,
+    dayOfWeek:  BASE.dayOfWeek + dayConsistency      * 0.16,
+    hourOfDay:  BASE.hourOfDay + hourConsistency     * 0.14,
+    skillLevel: BASE.skillLevel + skillConsistency   * 0.10,
   };
 
-  // Normalise so weights always sum to 1
   const total = Object.values(raw).reduce((a, b) => a + b, 0);
   return {
-    sport:     raw.sport     / total,
-    host:      raw.host      / total,
-    location:  raw.location  / total,
-    dayOfWeek: raw.dayOfWeek / total,
-    hourOfDay: raw.hourOfDay / total,
+    sport:      raw.sport     / total,
+    host:       raw.host      / total,
+    location:   raw.location  / total,
+    dayOfWeek:  raw.dayOfWeek / total,
+    hourOfDay:  raw.hourOfDay / total,
     skillLevel: raw.skillLevel / total,
   };
 }
 
-// ─── Reason generation ────────────────────────────────────
-// Reasons are also adaptive — we only mention dimensions
-// that are both consistent AND matched for this game.
-
 function buildAdaptiveReasons(
-  weights: Weights,
-  game: Game,
-  sportFreq: number,
-  hostFreq: number,
-  locationFreq: number,
-  dayFreq: number,
-  hourScore: number,
-  skillFreq: number,
-  gameDay: number
+  weights: Weights, game: Game,
+  sportFreq: number, hostFreq: number, locationFreq: number,
+  dayFreq: number, hourScore: number, skillFreq: number, gameDay: number
 ): string[] {
   const candidates: { weight: number; text: string }[] = [];
 
   if (sportFreq >= 0.3)
     candidates.push({ weight: weights.sport * sportFreq, text: `You often play ${game.sport}` });
-
   if (hostFreq >= 0.2)
     candidates.push({ weight: weights.host * hostFreq, text: `You've played with ${game.host} before` });
-
   if (locationFreq >= 0.15)
     candidates.push({ weight: weights.location * locationFreq, text: `You like playing at ${game.location}` });
-
   if (dayFreq >= 0.25) {
     const days = ["Sundays","Mondays","Tuesdays","Wednesdays","Thursdays","Fridays","Saturdays"];
     candidates.push({ weight: weights.dayOfWeek * dayFreq, text: `You usually play on ${days[gameDay]}` });
   }
-
   if (hourScore >= 0.6)
     candidates.push({ weight: weights.hourOfDay * hourScore, text: `Matches your preferred time` });
-
   if (skillFreq >= 0.25)
     candidates.push({ weight: weights.skillLevel * skillFreq, text: `${game.skillLevel} level suits you` });
 
-  // Return the top 2 reasons by weight — most important signals first
   return candidates
     .sort((a, b) => b.weight - a.weight)
     .slice(0, 2)
     .map((c) => c.text);
 }
-
-// ─── Local adaptive scoring ───────────────────────────────
 
 function localScore(history: BookingRecord[], game: Game): { score: number; reasons: string[] } {
   const weights = computeAdaptiveWeights(history);
@@ -161,8 +128,8 @@ function localScore(history: BookingRecord[], game: Game): { score: number; reas
   const histHours     = history.map((h) => h.hourOfDay);
   const histSkills    = history.map((h) => h.skillLevel);
 
-  const gameDay      = dayOfWeekFromDate(game.date);
-  const gameHour     = hourFromTime(game.time);
+  const gameDay   = dayOfWeekFromDate(game.date);
+  const gameHour  = hourFromTime(game.time);
 
   const sportFreq    = freq(histSports,    game.sport);
   const hostFreq     = freq(histHosts,     game.host);
@@ -189,8 +156,6 @@ function localScore(history: BookingRecord[], game: Game): { score: number; reas
   };
 }
 
-// ─── Exports ──────────────────────────────────────────────
-
 export function gameToBookingRecord(game: Game): BookingRecord {
   return {
     gameId:       game.id,
@@ -209,14 +174,20 @@ export async function scoreGamesAsync(
   username: string,
   games: Game[],
   joinedIds: Set<number>,
+  leftIds: Set<number>,          // ← added
   liveHistory: BookingRecord[]
 ): Promise<ScoredGame[]> {
   const seedHistory = USER_HISTORY[username.toLowerCase()] ?? [];
-  const history     = [...seedHistory, ...liveHistory];
+  // Exclude records for games the user has left
+  const filteredLive = liveHistory.filter((r) => !leftIds.has(r.gameId));
+  const history      = [...seedHistory, ...filteredLive];
 
   if (history.length === 0) return [];
 
-  const candidates = games.filter((g) => !joinedIds.has(g.id));
+  // Candidates: not joined, not left, not hosting
+  const candidates = games.filter(
+    (g) => !joinedIds.has(g.id) && !leftIds.has(g.id)
+  );
   if (candidates.length === 0) return [];
 
   try {
@@ -226,23 +197,22 @@ export async function scoreGamesAsync(
       body: JSON.stringify({
         history: history.map((h) => ({ ...h, costPerPlayer: 0 })),
         candidates: candidates.map((g) => ({
-          id:            g.id,
-          sport:         g.sport,
-          host:          g.host,
-          location:      g.location,
-          city:          g.city,
-          neighborhood:  g.location.split(" ")[0],
-          dayOfWeek:     dayOfWeekFromDate(g.date),
-          hourOfDay:     hourFromTime(g.time),
-          skillLevel:    g.skillLevel,
+          id:           g.id,
+          sport:        g.sport,
+          host:         g.host,
+          location:     g.location,
+          city:         g.city,
+          neighborhood: g.location.split(" ")[0],
+          dayOfWeek:    dayOfWeekFromDate(g.date),
+          hourOfDay:    hourFromTime(g.time),
+          skillLevel:   g.skillLevel,
           costPerPlayer: g.costPerPlayer,
-          distKm:        0,
+          distKm:       0,
         })),
       }),
     });
 
     if (!res.ok) throw new Error("API error");
-
     const data = await res.json();
 
     return data.results
@@ -253,7 +223,6 @@ export async function scoreGamesAsync(
       });
 
   } catch {
-    // API not running — fall back to local adaptive scoring
     return candidates
       .map((game) => {
         const { score, reasons } = localScore(history, game);
@@ -269,14 +238,16 @@ export function scoreGames(
   username: string,
   games: Game[],
   joinedIds: Set<number>,
+  leftIds: Set<number>,
   liveHistory: BookingRecord[]
 ): ScoredGame[] {
-  const seedHistory = USER_HISTORY[username.toLowerCase()] ?? [];
-  const history     = [...seedHistory, ...liveHistory];
+  const seedHistory  = USER_HISTORY[username.toLowerCase()] ?? [];
+  const filteredLive = liveHistory.filter((r) => !leftIds.has(r.gameId));
+  const history      = [...seedHistory, ...filteredLive];
   if (history.length === 0) return [];
 
   return games
-    .filter((g) => !joinedIds.has(g.id))
+    .filter((g) => !joinedIds.has(g.id) && !leftIds.has(g.id))
     .map((game) => {
       const { score, reasons } = localScore(history, game);
       return { game, score, reasons };
