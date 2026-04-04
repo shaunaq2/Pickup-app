@@ -69,7 +69,7 @@ export default function BrowsePage({
       (r) => !joinedGameHistory.some((j) => j.gameId === r.gameId)
     );
     const fullHistory = [...joinedGameHistory, ...liveOnlyNew];
-    scoreGamesAsync(username, games, joinedIds, fullHistory).then((results) => {
+    scoreGamesAsync(username, games, joinedIds, leftIds, fullHistory).then((results) => {
       if (!cancelled) setScored(results);
     });
     return () => { cancelled = true; };
