@@ -23,6 +23,7 @@ interface PastGame {
 
 interface Props {
   username: string;
+  onBackToSettings?: () => void;
 }
 
 type Section = "friends" | "search" | "qr";
@@ -129,13 +130,6 @@ function FriendProfile({ friendUsername, myUsername, friendshipId, onBack, onRem
 
   return (
     <div>
-      {/* Back */}
-      <button onClick={onBack} style={{
-        background: "none", border: "none", cursor: "pointer",
-        color: "var(--green)", fontWeight: 600, fontSize: 14,
-        padding: "0 0 16px 0", fontFamily: "inherit",
-      }}>← Back</button>
-
       {/* Profile header */}
       <div style={{
         display: "flex", flexDirection: "column", alignItems: "center",
@@ -250,7 +244,7 @@ function FriendProfile({ friendUsername, myUsername, friendshipId, onBack, onRem
 
 // ─── Main FriendsPage ─────────────────────────────────────
 
-export default function FriendsPage({ username }: Props) {
+export default function FriendsPage({ username, onBackToSettings }: Props) {
   const [section, setSection]             = useState<Section>("friends");
   const [friends, setFriends]             = useState<Friend[]>([]);
   const [pendingIn, setPendingIn]         = useState<Friend[]>([]);
@@ -340,21 +334,35 @@ export default function FriendsPage({ username }: Props) {
   // Show friend profile view
   if (viewingProfile) {
     return (
-      <FriendProfile
-        friendUsername={viewingProfile.username}
-        myUsername={username}
-        friendshipId={viewingProfile.friendshipId!}
-        onBack={() => setViewingProfile(null)}
-        onRemove={() => {
-          setFriends((prev) => prev.filter((f) => f.username !== viewingProfile.username));
-          setViewingProfile(null);
-        }}
-      />
+      <div>
+        <button onClick={() => setViewingProfile(null)} style={{
+          background: "none", border: "none", cursor: "pointer",
+          color: "var(--green)", fontWeight: 600, fontSize: 14,
+          padding: "0 0 16px 0", fontFamily: "inherit",
+        }}>← Friends</button>
+        <FriendProfile
+          friendUsername={viewingProfile.username}
+          myUsername={username}
+          friendshipId={viewingProfile.friendshipId!}
+          onBack={() => setViewingProfile(null)}
+          onRemove={() => {
+            setFriends((prev) => prev.filter((f) => f.username !== viewingProfile.username));
+            setViewingProfile(null);
+          }}
+        />
+      </div>
     );
   }
 
   return (
     <div>
+      {onBackToSettings && (
+        <button onClick={onBackToSettings} style={{
+          background: "none", border: "none", cursor: "pointer",
+          color: "var(--green)", fontWeight: 600, fontSize: 14,
+          padding: "0 0 16px 0", fontFamily: "inherit",
+        }}>← Settings</button>
+      )}
       {/* Section tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         {(["friends", "search", "qr"] as Section[]).map((s) => (

@@ -140,8 +140,7 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
   if (section === "friends") {
     return (
       <div className="settings-section">
-        <button className="settings-back" onClick={() => setSection("main")}>← Back</button>
-        <FriendsPage username={user.username} />
+        <FriendsPage username={user.username} onBackToSettings={() => setSection("main")} />
       </div>
     );
   }
