@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 import { User, WalletTx } from "../types";
 import FriendsPage from "./FriendsPage";
 import Avatar from "../components/Avatar";
@@ -112,7 +113,22 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
     const updated = { ...notifPrefs, [key]: value };
     setNotifPrefs(updated);
     saveNotifPrefs(updated);
+    // Sync show_games_joined to Supabase so friends can read it
+    if (key === "gameJoined") {
+      supabase.from("user_prefs").upsert(
+        { username: user.username, show_games_joined: value },
+        { onConflict: "username" }
+      );
+    }
   }
+
+  // Sync on mount
+  useEffect(() => {
+    supabase.from("user_prefs").upsert(
+      { username: user.username, show_games_joined: notifPrefs.gameJoined },
+      { onConflict: "username" }
+    );
+  }, [user.username]);
 
   function doTopUp() {
     onTopUp(topUpAmount);
