@@ -29,7 +29,7 @@ interface Props {
   onClose: () => void;
   onGoToWallet: () => void;
   onUnhost?: () => void;
-  onOpenChat: () => void;
+  onOpenChat?: () => void;
 }
 
 export default function GameModal({
@@ -159,7 +159,7 @@ export default function GameModal({
                 <div className="modal-sub">{game.city} · hosted by {game.host}</div>
               </div>
               {/* Chat button in header — only for joined/host */}
-              {canChat && (
+              {canChat && onOpenChat && (
                 <button
                   onClick={onOpenChat}
                   style={{
