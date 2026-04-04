@@ -478,7 +478,6 @@ export default function App() {
           {tab === "browse"        && <BrowsePage {...sharedGameProps} />}
           {tab === "post"          && <PostPage onPost={addGame} onSuccess={() => setTab("browse")} username={user.username} />}
           {tab === "mine"          && <MyGamesPage {...sharedGameProps} />}
-          {tab === "friends"       && <FriendsPage username={user.username} />}
           {tab === "chats"         && <ChatsPage games={games} username={user.username} joinedIds={joinedIds} isHost={isHost} />}
           {tab === "notifications" && (
             notifChatGameId ? (
