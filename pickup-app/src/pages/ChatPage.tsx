@@ -53,7 +53,9 @@ export default function ChatPage({ game, username, isHost, onBack }: Props) {
   const inputRef                    = useRef<HTMLInputElement>(null);
   const sport                       = getSport(game.sport);
 
-  const expired = room ? (!room.kept && new Date(room.expires_at) < new Date()) : false;
+  const gameStart = new Date(`${game.date}T${game.time}`);
+  const correctExpiry = new Date(gameStart.getTime() + 24 * 60 * 60 * 1000);
+  const expired = room ? (!room.kept && new Date() > correctExpiry) : false;
 
   useEffect(() => {
     let cancelled = false;
@@ -62,14 +64,17 @@ export default function ChatPage({ game, username, isHost, onBack }: Props) {
         .from("chat_rooms").select("*").eq("game_id", game.id).maybeSingle();
 
       if (!existingRoom) {
+        // Set expires_at to 24hrs after the game starts, not 24hrs from now
+        const gameStart = new Date(`${game.date}T${game.time}`);
+        const expiresAt = new Date(gameStart.getTime() + 24 * 60 * 60 * 1000).toISOString();
         const { data: newRoom } = await supabase
-          .from("chat_rooms").insert({ game_id: game.id }).select().single();
+          .from("chat_rooms").insert({ game_id: game.id, expires_at: expiresAt }).select().single();
         existingRoom = newRoom;
       }
 
       if (!cancelled && existingRoom) {
         setRoom(existingRoom);
-        const msLeft = new Date(existingRoom.expires_at).getTime() - Date.now();
+        const msLeft = correctExpiry.getTime() - Date.now();
         if (isHost && !existingRoom.kept && msLeft < 3600000) setShowPrompt(true);
       }
 
@@ -203,7 +208,7 @@ export default function ChatPage({ game, username, isHost, onBack }: Props) {
 
         {room && !room.kept && !expired && (
           <div style={{ fontSize: 10, color: "var(--text-3)", background: "var(--surface-2,#f0f0f0)", borderRadius: 6, padding: "3px 7px", flexShrink: 0 }}>
-            ⏱ {formatExpiry(room.expires_at)}
+            ⏱ {formatExpiry(correctExpiry.toISOString())}
           </div>
         )}
         {room?.kept && <div style={{ fontSize: 10, color: "var(--green)", fontWeight: 600, flexShrink: 0 }}>✓ Saved</div>}
