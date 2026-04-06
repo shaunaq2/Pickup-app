@@ -5,10 +5,15 @@ const { Resend } = require("resend");
 const app    = express();
 const resend = new Resend("re_Aq92i3aD_N5LzPiZjCa2h47ycSUNXFEgj");
 
+const ONESIGNAL_APP_ID  = "290e603b-67ab-4fc4-b759-46f40161ce9d";
+const ONESIGNAL_API_KEY = process.env.ONESIGNAL_REST_API_KEY ?? "";
+
 app.use(cors());
 app.use(express.json());
 
 const codes = {};
+
+// ── Email: send verification code ────────────────────────
 
 app.post("/send-code", async (req, res) => {
   const { email } = req.body;
@@ -58,6 +63,51 @@ app.post("/verify-code", (req, res) => {
 
   delete codes[email];
   res.json({ valid: true });
+});
+
+// ── Push notifications via OneSignal ─────────────────────
+
+app.post("/notify", async (req, res) => {
+  const { userIds, title, message, url } = req.body;
+
+  if (!userIds || !userIds.length || !title || !message) {
+    return res.status(400).json({ error: "userIds, title and message are required" });
+  }
+
+  if (!ONESIGNAL_API_KEY) {
+    console.warn("ONESIGNAL_REST_API_KEY not set — skipping push");
+    return res.json({ success: false, reason: "No API key" });
+  }
+
+  try {
+    const response = await fetch("https://onesignal.com/api/v1/notifications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${ONESIGNAL_API_KEY}`,
+      },
+      body: JSON.stringify({
+        app_id: ONESIGNAL_APP_ID,
+        include_aliases: { external_id: userIds },
+        target_channel: "push",
+        headings:  { en: title },
+        contents:  { en: message },
+        url:       url ?? "https://playrunit.com",
+      }),
+    });
+
+    const data = await response.json();
+    if (data.errors) {
+      console.error("OneSignal error:", data.errors);
+      return res.status(500).json({ error: "OneSignal error", detail: data.errors });
+    }
+
+    console.log(`Push sent to ${userIds.length} user(s): ${title}`);
+    res.json({ success: true, id: data.id });
+  } catch (err) {
+    console.error("Push notification error:", err.message);
+    res.status(500).json({ error: "Failed to send push", detail: err.message });
+  }
 });
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
