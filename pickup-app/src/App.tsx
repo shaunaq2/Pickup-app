@@ -61,7 +61,12 @@ async function fetchAllGames(): Promise<Game[]> {
 }
 
 export default function App() {
-  const [user, setUser]                   = useState<User | null>(null);
+  const [user, setUser]                   = useState<User | null>(() => {
+    try {
+      const stored = localStorage.getItem("runit_user");
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
   const [tab, setTab]                     = useState<TabId>("browse");
   const [notifChatGameId, setNotifChatGameId] = useState<number | null>(null);
   const [games, setGames]                 = useState<Game[]>([]);
@@ -244,6 +249,7 @@ export default function App() {
   async function handleLogin(u: User) {
     resetForNewSession();
     setUser(u);
+    localStorage.setItem("runit_user", JSON.stringify(u));
     await Promise.all([refreshGames(), loadUserGameState(u.username)]);
     await loadSocialNotifs(u.username);
     subscribeUser(u.username); // register for push notifications
@@ -251,6 +257,7 @@ export default function App() {
 
   function handleLogout() {
     unsubscribeUser();
+    localStorage.removeItem("runit_user");
     resetForNewSession();
     setUser(null);
   }
