@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Game, SkillLevel, Privacy } from "../types";
 import { PHYSICAL_SPORTS, ESPORTS } from "../data/sports";
 import { CITY_COORDS } from "../utils";
+import LocationAutocomplete from "../components/LocationAutocomplete";
 
 interface PostForm {
   sport: string;
   location: string;
   city: string;
+  lat: number;
+  lng: number;
   date: string;
   time: string;
   duration: string;
@@ -23,6 +26,8 @@ const DEFAULT_FORM: PostForm = {
   sport: "",
   location: "",
   city: "",
+  lat: 0,
+  lng: 0,
   date: "",
   time: "",
   duration: "60",
@@ -115,20 +120,21 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
     if (!form.sport)           return setError("Pick a sport");
     if (form.sport === "custom" && !customSport.trim()) return setError("Enter a sport or game name");
     if (!form.location.trim()) return setError("Add a location");
-    if (!form.city.trim())     return setError("Add a city");
+    if (!form.city.trim())     return setError("Add a city — search and select from the dropdown");
     if (!form.date)            return setError("Pick a date");
     if (!form.time)            return setError("Pick a time");
 
     setGeocoding(true);
 
-    let coords = resolvedCoords;
-    if (!coords) {
-      coords = await geocodeLocation(form.location.trim(), form.city.trim());
-      if (!coords) {
+    // Use coords from autocomplete if available, otherwise fall back to geocoding
+    let coords = { lat: form.lat, lng: form.lng };
+    if (!coords.lat && !coords.lng) {
+      const geocoded = await geocodeLocation(form.location.trim(), form.city.trim());
+      if (geocoded) {
+        coords = geocoded;
+      } else {
         const cityKey = form.city.trim().toLowerCase();
         coords = CITY_COORDS[cityKey] ?? { lat: 0, lng: 0 };
-      } else {
-        setResolvedCoords(coords);
       }
     }
 
@@ -317,25 +323,25 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
         </div>
       </div>
 
-      <div className="form-row">
-        <div className="form-group">
-          <label className="form-label">Location / venue</label>
-          <input
-            className="form-input"
-            placeholder="e.g. Vilas Park Courts"
-            value={form.location}
-            onChange={(e) => set("location", e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">City</label>
-          <input
-            className="form-input"
-            placeholder="e.g. Madison"
-            value={form.city}
-            onChange={(e) => set("city", e.target.value)}
-          />
-        </div>
+      <div className="form-group">
+        <label className="form-label">Location / venue</label>
+        <LocationAutocomplete
+          value={form.location}
+          onChange={(v) => set("location", v)}
+          onSelect={(location, city, lat, lng) => {
+            set("location", location);
+            set("city", city);
+            set("lat", lat);
+            set("lng", lng);
+          }}
+          placeholder="Search venue or address..."
+          className="form-input"
+        />
+        {form.city ? (
+          <div style={{ fontSize: 11, color: "var(--green)", marginTop: 4 }}>
+            📍 {form.city}
+          </div>
+        ) : null}
       </div>
 
       <div className="form-row">
