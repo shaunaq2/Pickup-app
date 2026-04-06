@@ -10,6 +10,8 @@ interface Props {
   transactions: WalletTx[];
   onTopUp: (amount: number) => void;
   onLogout: () => void;
+  darkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
 type Section = "main" | "wallet" | "topup" | "friends" | "notifications" | "privacy";
@@ -102,12 +104,29 @@ function NotifRow({ label, sub, value, onChange }: { label: string; sub?: string
   );
 }
 
-export default function SettingsPage({ user, balance, transactions, onTopUp, onLogout }: Props) {
+export default function SettingsPage({ user, balance, transactions, onTopUp, onLogout, darkMode, onToggleDarkMode }: Props) {
   const [section, setSection]         = useState<Section>("main");
   const [topUpAmount, setTopUpAmount] = useState(10);
   const [payMethod, setPayMethod]     = useState("card");
   const [confirming, setConfirming]   = useState(false);
   const [notifPrefs, setNotifPrefs]   = useState<NotifPrefs>(loadNotifPrefs);
+  const [installPrompt, setInstallPrompt] = React.useState<any>(null);
+  const [installed, setInstalled] = React.useState(false);
+
+  React.useEffect(() => {
+    const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
+    window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', () => setInstalled(true));
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  async function handleInstall() {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setInstalled(true);
+    setInstallPrompt(null);
+  }
 
   function updatePref(key: keyof NotifPrefs, value: boolean) {
     const updated = { ...notifPrefs, [key]: value };
@@ -327,6 +346,29 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
       </button>
 
       <div className="settings-divider" />
+
+      {/* Install app */}
+      {(installPrompt || installed) && (
+        <>
+          <div className="settings-group-label">App</div>
+          <div className="settings-row static">
+            <span className="settings-row-icon">📲</span>
+            <div className="settings-row-body">
+              <div className="settings-row-label">Install RunIt</div>
+              <div className="settings-row-sub">{installed ? "App installed on your device" : "Add to your home screen"}</div>
+            </div>
+            {!installed && (
+              <button onClick={handleInstall} style={{
+                padding: "6px 14px", borderRadius: 8, fontSize: 12,
+                border: "none", background: "var(--green)", color: "#fff",
+                cursor: "pointer", fontWeight: 600, fontFamily: "inherit",
+              }}>Install</button>
+            )}
+            {installed && <span style={{ fontSize: 18 }}>✓</span>}
+          </div>
+          <div className="settings-divider" />
+        </>
+      )}
 
       {/* Wallet */}
       <div className="settings-group-label">Finance</div>

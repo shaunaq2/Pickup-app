@@ -75,6 +75,17 @@ export default function App() {
   const [balance, setBalance]             = useState<number>(0);
   const [transactions, setTransactions]   = useState<WalletTx[]>([]);
   const [hostGameIds, setHostGameIds]     = useState<Set<number>>(new Set());
+  const [darkMode, setDarkMode]           = useState<boolean>(() => {
+    const stored = localStorage.getItem("theme");
+    if (stored) return stored === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  // Apply theme to html element
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   const userRef = useRef<User | null>(null);
   userRef.current = user;
@@ -513,7 +524,7 @@ export default function App() {
             )
           )}
           {tab === "wallet" && (
-            <SettingsPage user={user} balance={balance} transactions={transactions} onTopUp={topUp} onLogout={handleLogout} />
+            <SettingsPage user={user} balance={balance} transactions={transactions} onTopUp={topUp} onLogout={handleLogout} darkMode={darkMode} onToggleDarkMode={() => setDarkMode(d => !d)} />
           )}
         </main>
 
