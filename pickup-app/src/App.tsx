@@ -269,6 +269,22 @@ export default function App() {
     ]);
   }
 
+
+  const API = "https://pickup-api-n8uj.onrender.com";
+
+  async function pushNotify(userIds: string[], title: string, message: string) {
+    if (!userIds.length) return;
+    try {
+      await fetch(`${API}/notify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userIds, title, message }),
+      });
+    } catch (e) {
+      console.error("Push failed:", e);
+    }
+  }
+
   function addTx(type: WalletTx["type"], amount: number, label: string) {
     setTransactions((prev) => [
       { id: nextTxId++, type, amount, label, timestamp: new Date() },
@@ -301,6 +317,7 @@ export default function App() {
     await supabase.from("game_players").insert({ game_id: gameId, username: nextPlayer });
     await supabase.from("waitlist").delete().eq("game_id", gameId).eq("username", nextPlayer);
     addNotif("off_waitlist", gameId, game.sport, game.location, nextPlayer);
+    pushNotify([nextPlayer], "Spot opened up! 🎉", `You're now in ${game.sport} at ${game.location} — a spot opened up!`);
     await refreshGames();
   }
 
@@ -316,7 +333,11 @@ export default function App() {
     if (error) { console.error("joinGame:", error); return; }
     setJoinedIds((prev) => new Set(prev).add(id));
     setLiveHistory((prev) => [...prev, gameToBookingRecord(game)]);
-    if (!isHost(id)) addNotif("you_joined", id, game.sport, game.location, user!.username);
+    if (!isHost(id)) {
+      addNotif("you_joined", id, game.sport, game.location, user!.username);
+      // Notify host
+      pushNotify([game.host], "New player joined! 🎉", `${user!.username} joined your ${game.sport} game at ${game.location}`);
+    }
     // Mark any invite for this game as accepted
     await supabase.from("game_invites").update({ status: "accepted" })
       .eq("game_id", id).eq("invitee", user!.username);
@@ -362,14 +383,20 @@ export default function App() {
     const game = games.find((g) => g.id === gameId);
     await supabase.from("join_requests").update({ status: "approved" }).eq("game_id", gameId).eq("username", playerName);
     await supabase.from("game_players").insert({ game_id: gameId, username: playerName });
-    if (game) addNotif("request_approved", gameId, game.sport, game.location, playerName);
+    if (game) {
+      addNotif("request_approved", gameId, game.sport, game.location, playerName);
+      pushNotify([playerName], "Request approved! ✅", `You're in! Your request to join ${game.sport} at ${game.location} was approved`);
+    }
     await refreshGames();
   }
 
   async function denyRequest(gameId: number, playerName: string) {
     const game = games.find((g) => g.id === gameId);
     await supabase.from("join_requests").update({ status: "denied" }).eq("game_id", gameId).eq("username", playerName);
-    if (game) addNotif("request_denied", gameId, game.sport, game.location, playerName);
+    if (game) {
+      addNotif("request_denied", gameId, game.sport, game.location, playerName);
+      pushNotify([playerName], "Request update", `Your request to join ${game.sport} at ${game.location} was not approved`);
+    }
     await refreshGames();
   }
 
@@ -570,4 +597,3 @@ function NotifIcon() {
 function SettingsIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>;
 }
-

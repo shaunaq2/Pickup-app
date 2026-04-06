@@ -95,6 +95,18 @@ export default function GameModal({
     }, { onConflict: "game_id,invitee" });
     setInvitedIds((prev) => new Set(prev).add(toUsername));
     setInviteLoading(null);
+    // Send push notification to invited friend
+    try {
+      await fetch("https://pickup-api-n8uj.onrender.com/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userIds: [toUsername],
+          title: "Game invite 📩",
+          message: `${username} invited you to ${game.sport} at ${game.location}`,
+        }),
+      });
+    } catch (e) { console.error("Push failed:", e); }
   }
 
   function confirmLeave() { setLeaveConfirm(false); onLeave(); onClose(); }
