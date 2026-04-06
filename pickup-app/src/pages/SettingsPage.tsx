@@ -385,6 +385,26 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
 
       {/* Preferences */}
       <div className="settings-group-label">Preferences</div>
+      <div className="settings-row static">
+        <span className="settings-row-icon">{darkMode ? "🌙" : "☀️"}</span>
+        <div className="settings-row-body">
+          <div className="settings-row-label">Dark mode</div>
+          <div className="settings-row-sub">{darkMode ? "On" : "Off"}</div>
+        </div>
+        <div onClick={onToggleDarkMode} style={{
+          width: 44, height: 26, borderRadius: 13,
+          background: darkMode ? "var(--green)" : "var(--border-mid)",
+          position: "relative", cursor: "pointer", transition: "background 0.2s", flexShrink: 0,
+        }}>
+          <div style={{
+            position: "absolute", top: 3,
+            left: darkMode ? 21 : 3,
+            width: 20, height: 20, borderRadius: "50%",
+            background: "#fff", transition: "left 0.2s",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          }} />
+        </div>
+      </div>
       <button className="settings-row" onClick={() => setSection("notifications")}>
         <span className="settings-row-icon">🔔</span>
         <div className="settings-row-body">
