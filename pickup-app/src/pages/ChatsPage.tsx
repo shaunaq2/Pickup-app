@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import { Game } from "../types";
 import { getSport, formatDate, formatTime } from "../utils";
 import Avatar from "../components/Avatar";
+import UserAvatar from "../components/UserAvatar";
 import ChatPage from "./ChatPage";
 
 interface ChatRoom {
@@ -95,7 +96,7 @@ function MembersPanel({ group, username, onClose }: { group: GroupChat; username
             display: "flex", alignItems: "center", gap: 12,
             padding: "10px 0", borderBottom: "0.5px solid var(--border)",
           }}>
-            <Avatar name={member} idx={member.charCodeAt(0) % 6} size={40} fontSize={16} />
+              <UserAvatar username={member} idx={member.charCodeAt(0) % 6} size={40} fontSize={16} />
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: 14, color: "var(--text)" }}>
                 @{member}

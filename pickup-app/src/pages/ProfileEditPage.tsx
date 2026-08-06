@@ -22,9 +22,18 @@ export default function ProfileEditPage({ username, onBack, onUsernameChange }: 
 
   // Load existing profile
   useEffect(() => {
+    // Load from localStorage immediately
+    const cached = localStorage.getItem(`runit_avatar_${username}`);
+    if (cached) setAvatarUrl(cached);
+    // Then fetch from Supabase to get latest
     supabase.from("user_profiles").select("avatar_url")
       .eq("username", username).maybeSingle()
-      .then(({ data }) => { if (data?.avatar_url) setAvatarUrl(data.avatar_url); });
+      .then(({ data }) => {
+        if (data?.avatar_url) {
+          setAvatarUrl(data.avatar_url);
+          localStorage.setItem(`runit_avatar_${username}`, data.avatar_url);
+        }
+      });
   }, [username]);
 
   // Check username availability with debounce
@@ -75,6 +84,7 @@ export default function ProfileEditPage({ username, onBack, onUsernameChange }: 
     }, { onConflict: "username" });
 
     setAvatarUrl(publicUrl);
+    localStorage.setItem(`runit_avatar_${username}`, publicUrl);
     setUploading(false);
     setSuccess("Photo updated!");
     setTimeout(() => setSuccess(""), 3000);

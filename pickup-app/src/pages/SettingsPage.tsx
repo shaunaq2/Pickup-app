@@ -101,9 +101,16 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
 
   // Load avatar
   useEffect(() => {
+    const cached = localStorage.getItem(`runit_avatar_${user.username}`);
+    if (cached) setAvatarUrl(cached);
     supabase.from("user_profiles").select("avatar_url")
       .eq("username", user.username).maybeSingle()
-      .then(({ data }) => { if (data?.avatar_url) setAvatarUrl(data.avatar_url); });
+      .then(({ data }) => {
+        if (data?.avatar_url) {
+          setAvatarUrl(data.avatar_url);
+          localStorage.setItem(`runit_avatar_${user.username}`, data.avatar_url);
+        }
+      });
   }, [user.username]);
 
   function updatePref(key: keyof NotifPrefs, value: boolean) {
