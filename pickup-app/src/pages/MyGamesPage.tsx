@@ -58,7 +58,6 @@ export default function MyGamesPage({
   const totalPlaying = playUpcoming.length + playPast.length + liveHistory.length;
   const totalHosting = hostUpcoming.length + hostPast.length;
 
-  // Full-screen chat
   if (chatGame) {
     return (
       <ChatPage
@@ -131,8 +130,12 @@ export default function MyGamesPage({
             <EmptyState icon="🏅" text="No past games yet." sub="Games you've played will appear here." />
           ) : (
             <>
-              {playPast.map((g) => <PastGameRow key={g.id} game={g} label="Played" />)}
-              {liveHistory.map((record, i) => <PastRecordRow key={i} record={record} />)}
+              {playPast.map((g) => (
+                <PastGameRow key={g.id} game={g} label="Played" onOpen={setModalId} />
+              ))}
+              {liveHistory.map((record, i) => (
+                <PastRecordRow key={i} record={record} />
+              ))}
             </>
           )}
         </>
@@ -152,7 +155,9 @@ export default function MyGamesPage({
         <>
           {hostPast.length === 0 ? (
             <EmptyState icon="📋" text="No past hosted games yet." sub="Games you've hosted will appear here." />
-          ) : hostPast.map((g) => <PastGameRow key={g.id} game={g} label="Hosted" />)}
+          ) : hostPast.map((g) => (
+            <PastGameRow key={g.id} game={g} label="Hosted" onOpen={setModalId} />
+          ))}
         </>
       )}
 
@@ -192,10 +197,14 @@ function EmptyState({ icon, text, sub }: { icon: string; text: string; sub: stri
   );
 }
 
-function PastGameRow({ game, label }: { game: Game; label: string }) {
+function PastGameRow({ game, label, onOpen }: { game: Game; label: string; onOpen: (id: number) => void }) {
   const sport = getSport(game.sport) ?? { id: game.sport, label: game.sport, icon: "🎮", bg: "#E8E8FB", color: "#2C2C8E" };
   return (
-    <div className="past-game-row">
+    <div
+      className="past-game-row"
+      onClick={() => onOpen(game.id)}
+      style={{ cursor: "pointer" }}
+    >
       <div className="past-game-icon" style={{ background: sport.bg }}>
         {sport.icon.startsWith("img:")
           ? <img src={`/${sport.icon.replace("img:", "")}`} alt={sport.label} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
@@ -205,7 +214,10 @@ function PastGameRow({ game, label }: { game: Game; label: string }) {
         <div className="past-game-name">{sport.label}</div>
         <div className="past-game-meta">{game.location} · {formatDate(game.date)}</div>
       </div>
-      <span className="past-game-label">{label}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <span className="past-game-label">{label}</span>
+        <span style={{ fontSize: 13, color: "var(--text-3)" }}>›</span>
+      </div>
     </div>
   );
 }

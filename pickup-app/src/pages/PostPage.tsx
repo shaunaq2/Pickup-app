@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Game, SkillLevel, Privacy } from "../types";
 import { PHYSICAL_SPORTS, ESPORTS } from "../data/sports";
 import { CITY_COORDS } from "../utils";
@@ -6,10 +6,12 @@ import LocationAutocomplete from "../components/LocationAutocomplete";
 
 interface PostForm {
   sport: string;
+  venueName: string;
   location: string;
   city: string;
   lat: number;
   lng: number;
+  region: string;
   date: string;
   time: string;
   duration: string;
@@ -24,10 +26,12 @@ interface PostForm {
 
 const DEFAULT_FORM: PostForm = {
   sport: "",
+  venueName: "",
   location: "",
   city: "",
   lat: 0,
   lng: 0,
+  region: "",
   date: "",
   time: "",
   duration: "60",
@@ -55,6 +59,23 @@ const SKILL_OPTIONS: { id: SkillLevel; label: string; desc: string }[] = [
   { id: "advanced",     label: "Advanced",     desc: "Competitive" },
 ];
 
+const REGIONS = [
+  { id: "na-east",    label: "NA East",      flag: "🇺🇸" },
+  { id: "na-west",    label: "NA West",      flag: "🇺🇸" },
+  { id: "na-central", label: "NA Central",   flag: "🇺🇸" },
+  { id: "eu-west",    label: "EU West",      flag: "🇪🇺" },
+  { id: "eu-east",    label: "EU East",      flag: "🇪🇺" },
+  { id: "eu-north",   label: "EU North",     flag: "🇪🇺" },
+  { id: "latam",      label: "LATAM",        flag: "🌎" },
+  { id: "brazil",     label: "Brazil",       flag: "🇧🇷" },
+  { id: "oce",        label: "OCE",          flag: "🇦🇺" },
+  { id: "asia",       label: "Asia",         flag: "🌏" },
+  { id: "kr",         label: "Korea",        flag: "🇰🇷" },
+  { id: "jp",         label: "Japan",        flag: "🇯🇵" },
+  { id: "me",         label: "Middle East",  flag: "🌍" },
+  { id: "af",         label: "Africa",       flag: "🌍" },
+];
+
 interface Props {
   onPost: (game: Omit<Game, "id">) => void;
   onSuccess: () => void;
@@ -62,15 +83,13 @@ interface Props {
 }
 
 export default function PostPage({ onPost, onSuccess, username }: Props) {
-  const [form, setForm]       = useState<PostForm>(DEFAULT_FORM);
-  const [error, setError]     = useState("");
+  const [form, setForm]         = useState<PostForm>(DEFAULT_FORM);
+  const [error, setError]       = useState("");
   const [sportTab, setSportTab] = useState<"physical"|"esports">("physical");
   const [customSport, setCustomSport] = useState("");
-  const [geocoding, setGeocoding] = useState(false);
-  const [resolvedCoords, setResolvedCoords] = useState<{lat: number; lng: number} | null>(null);
-  const [resolvedAddress, setResolvedAddress] = useState("");
+  const [geocoding, setGeocoding]     = useState(false);
 
-  const today = new Date().toISOString().split("T")[0];
+  const isEsport = sportTab === "esports";
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
 
   const numSpots      = parseInt(form.spots) || 0;
@@ -81,23 +100,8 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
 
   function set<K extends keyof PostForm>(key: K, value: PostForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
-    setResolvedCoords(null);
-    setResolvedAddress("");
     setError("");
   }
-
-  useEffect(() => {
-    if (!form.location.trim() || !form.city.trim()) {
-      setResolvedCoords(null);
-      setResolvedAddress("");
-      return;
-    }
-    const timer = setTimeout(async () => {
-      const coords = await geocodeLocation(form.location.trim(), form.city.trim());
-      if (coords) setResolvedCoords(coords);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [form.location, form.city]);
 
   async function geocodeLocation(location: string, city: string): Promise<{lat: number; lng: number} | null> {
     try {
@@ -117,18 +121,17 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
   }
 
   async function submit() {
-    if (!form.sport)           return setError("Pick a sport");
+    if (!form.sport) return setError("Pick a sport");
     if (form.sport === "custom" && !customSport.trim()) return setError("Enter a sport or game name");
-    if (!form.location.trim()) return setError("Add a location");
-    if (!form.city.trim())     return setError("Add a city — search and select from the dropdown");
-    if (!form.date)            return setError("Pick a date");
-    if (!form.time)            return setError("Pick a time");
+    if (isEsport && !form.region) return setError("Pick a region");
+    if (!isEsport && !form.location.trim()) return setError("Add an address");
+    if (!form.date) return setError("Pick a date");
+    if (!form.time) return setError("Pick a time");
 
     setGeocoding(true);
 
-    // Use coords from autocomplete if available, otherwise fall back to geocoding
     let coords = { lat: form.lat, lng: form.lng };
-    if (!coords.lat && !coords.lng) {
+    if (!isEsport && !coords.lat && !coords.lng) {
       const geocoded = await geocodeLocation(form.location.trim(), form.city.trim());
       if (geocoded) {
         coords = geocoded;
@@ -140,10 +143,18 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
 
     setGeocoding(false);
 
+    // For esports: location = region label, city = region id
+    const regionData = REGIONS.find(r => r.id === form.region);
+    const displayLocation = isEsport
+      ? (regionData ? `${regionData.flag} ${regionData.label}` : form.region)
+      : (form.venueName.trim()
+          ? `${form.venueName.trim()}, ${form.location.trim()}`
+          : form.location.trim());
+
     onPost({
       sport:        form.sport === "custom" ? customSport.trim().toLowerCase() || "other" : form.sport,
-      location:     form.location.trim(),
-      city:         form.city.trim(),
+      location:     displayLocation,
+      city:         isEsport ? (form.region || "") : form.city.trim(),
       lat:          coords.lat,
       lng:          coords.lng,
       date:         form.date,
@@ -171,6 +182,7 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
   return (
     <div className="form-section">
 
+      {/* ── Sport ── */}
       <div className="form-group">
         <label className="form-label">Sport</label>
         <div className="sport-category-tabs">
@@ -178,7 +190,12 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
             <button
               key={t.id}
               className={`sport-cat-tab ${sportTab === t.id ? "active" : ""}`}
-              onClick={() => setSportTab(t.id as "physical"|"esports")}
+              onClick={() => {
+                setSportTab(t.id as "physical"|"esports");
+                set("sport", "");
+                set("region", "");
+                setCustomSport("");
+              }}
             >
               {t.label}
             </button>
@@ -214,7 +231,7 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
         {form.sport === "custom" && (
           <input
             className="form-input"
-            placeholder={sportTab === "esports" ? "e.g. Valorant, Apex Legends..." : "e.g. Lacrosse, Handball..."}
+            placeholder={isEsport ? "e.g. Valorant, Apex Legends..." : "e.g. Lacrosse, Handball..."}
             value={customSport}
             onChange={(e) => setCustomSport(e.target.value)}
             style={{ marginTop: 8 }}
@@ -222,6 +239,7 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
         )}
       </div>
 
+      {/* ── Recurring ── */}
       <div className="form-group">
         <label className="form-label">Recurring</label>
         <div className="privacy-toggle" style={{ marginBottom: 0 }}>
@@ -242,6 +260,7 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
         </div>
       </div>
 
+      {/* ── Waitlist ── */}
       <div className="form-group">
         <label className="form-label">Waitlist</label>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
@@ -281,6 +300,7 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
         )}
       </div>
 
+      {/* ── Visibility ── */}
       <div className="form-group">
         <label className="form-label">Visibility</label>
         <div className="privacy-toggle">
@@ -307,6 +327,7 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
         </div>
       </div>
 
+      {/* ── Skill level ── */}
       <div className="form-group">
         <label className="form-label">Skill level</label>
         <div className="skill-options">
@@ -323,27 +344,75 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
         </div>
       </div>
 
-      <div className="form-group">
-        <label className="form-label">Location / venue</label>
-        <LocationAutocomplete
-          value={form.location}
-          onChange={(v) => set("location", v)}
-          onSelect={(location, city, lat, lng) => {
-            set("location", location);
-            set("city", city);
-            set("lat", lat);
-            set("lng", lng);
-          }}
-          placeholder="Search venue or address..."
-          className="form-input"
-        />
-        {form.city ? (
-          <div style={{ fontSize: 11, color: "var(--green)", marginTop: 4 }}>
-            📍 {form.city}
+      {/* ── Location: physical only ── */}
+      {!isEsport && (
+        <>
+          <div className="form-group">
+            <label className="form-label">
+              Venue name{" "}
+              <span style={{ color: "var(--text-3)", fontWeight: 400 }}>(optional)</span>
+            </label>
+            <input
+              className="form-input"
+              type="text"
+              placeholder="e.g. Riverside Park Court 3, LA Fitness, My Backyard"
+              value={form.venueName}
+              onChange={(e) => set("venueName", e.target.value)}
+            />
           </div>
-        ) : null}
-      </div>
 
+          <div className="form-group">
+            <label className="form-label">Address</label>
+            <LocationAutocomplete
+              value={form.location}
+              onChange={(v) => set("location", v)}
+              onSelect={(location, city, lat, lng) => {
+                set("location", location);
+                set("city", city);
+                set("lat", lat);
+                set("lng", lng);
+              }}
+              placeholder="Search street address..."
+            />
+            {form.city && (
+              <div style={{ fontSize: 11, color: "var(--green)", marginTop: 4 }}>
+                📍 {form.city}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ── Region: esports only ── */}
+      {isEsport && (
+        <div className="form-group">
+          <label className="form-label">Server region</label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
+            {REGIONS.map((r) => (
+              <button
+                key={r.id}
+                onClick={() => set("region", r.id)}
+                style={{
+                  padding: "7px 14px",
+                  borderRadius: 20,
+                  border: "1.5px solid",
+                  borderColor: form.region === r.id ? "var(--green)" : "var(--border)",
+                  background: form.region === r.id ? "var(--green-dim, rgba(0,200,100,0.12))" : "transparent",
+                  color: form.region === r.id ? "var(--green)" : "var(--text-2)",
+                  fontSize: 13,
+                  fontWeight: form.region === r.id ? 600 : 400,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                {r.flag} {r.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Date / Time ── */}
       <div className="form-row">
         <div className="form-group">
           <label className="form-label">Date</label>
@@ -366,6 +435,7 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
         </div>
       </div>
 
+      {/* ── Duration / Max players ── */}
       <div className="form-row">
         <div className="form-group">
           <label className="form-label">Duration</label>
@@ -393,40 +463,44 @@ export default function PostPage({ onPost, onSuccess, username }: Props) {
         </div>
       </div>
 
-      <div className="form-group">
-        <label className="form-label">Ground cost (optional)</label>
-        <div className="cost-row">
-          <div className="cost-input-wrap">
-            <span className="cost-prefix">$</span>
-            <input
-              className="form-input cost-input"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              value={form.groundCost}
-              onChange={(e) => set("groundCost", e.target.value)}
-            />
+      {/* ── Ground cost: physical only ── */}
+      {!isEsport && (
+        <div className="form-group">
+          <label className="form-label">Ground cost (optional)</label>
+          <div className="cost-row">
+            <div className="cost-input-wrap">
+              <span className="cost-prefix">$</span>
+              <input
+                className="form-input cost-input"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={form.groundCost}
+                onChange={(e) => set("groundCost", e.target.value)}
+              />
+            </div>
+            {costPerPlayer > 0 && (
+              <div className="cost-preview">
+                <span className="cost-preview-amt">${costPerPlayer.toFixed(2)}</span>
+                <span className="cost-preview-label">per player</span>
+              </div>
+            )}
           </div>
-          {costPerPlayer > 0 && (
-            <div className="cost-preview">
-              <span className="cost-preview-amt">${costPerPlayer.toFixed(2)}</span>
-              <span className="cost-preview-label">per player</span>
+          {groundCostNum > 0 && (
+            <div className="cost-note">
+              ${groundCostNum.toFixed(2)} total ÷ {numSpots} players = ${costPerPlayer.toFixed(2)} each
             </div>
           )}
         </div>
-        {groundCostNum > 0 && (
-          <div className="cost-note">
-            ${groundCostNum.toFixed(2)} total ÷ {numSpots} players = ${costPerPlayer.toFixed(2)} each
-          </div>
-        )}
-      </div>
+      )}
 
+      {/* ── Notes ── */}
       <div className="form-group">
         <label className="form-label">Notes (optional)</label>
         <textarea
           className="form-textarea"
-          placeholder="What to bring, any rules..."
+          placeholder={isEsport ? "Game mode, rank requirements, voice chat..." : "What to bring, any rules..."}
           value={form.note}
           onChange={(e) => set("note", e.target.value)}
         />

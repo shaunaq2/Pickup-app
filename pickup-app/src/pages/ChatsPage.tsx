@@ -5,8 +5,6 @@ import { getSport, formatDate, formatTime } from "../utils";
 import Avatar from "../components/Avatar";
 import ChatPage from "./ChatPage";
 
-// ─── Types ────────────────────────────────────────────────
-
 interface ChatRoom {
   game_id: number;
   created_at: string;
@@ -50,8 +48,6 @@ interface Props {
   isHost: (id: number) => boolean;
 }
 
-// ─── Helpers ─────────────────────────────────────────────
-
 function timeAgo(dateStr: string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
   if (diff < 60)     return "just now";
@@ -70,15 +66,64 @@ function markSeen(key: string) {
   localStorage.setItem("chat_seen", JSON.stringify(seen));
 }
 
+// ─── Members Panel ────────────────────────────────────────
+
+function MembersPanel({ group, username, onClose }: { group: GroupChat; username: string; onClose: () => void }) {
+  return (
+    <div style={{
+      position: "absolute", inset: 0, background: "var(--bg)",
+      zIndex: 10, display: "flex", flexDirection: "column",
+    }}>
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "12px 16px", borderBottom: "1px solid var(--border)",
+        background: "var(--surface)", flexShrink: 0,
+      }}>
+        <button onClick={onClose} style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontSize: 22, color: "var(--text-2)", padding: "0 4px",
+        }}>←</button>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}>Members</div>
+          <div style={{ fontSize: 11, color: "var(--text-3)" }}>{group.members.length} people</div>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
+        {group.members.map((member, i) => (
+          <div key={member} style={{
+            display: "flex", alignItems: "center", gap: 12,
+            padding: "10px 0", borderBottom: "0.5px solid var(--border)",
+          }}>
+            <Avatar name={member} idx={member.charCodeAt(0) % 6} size={40} fontSize={16} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: "var(--text)" }}>
+                @{member}
+                {member === username && (
+                  <span style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 400, marginLeft: 6 }}>you</span>
+                )}
+              </div>
+              {member === group.created_by && (
+                <div style={{ fontSize: 11, color: "var(--green)", marginTop: 1 }}>Admin</div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Group Chat View ──────────────────────────────────────
 
 function GroupChatView({ group, username, onBack }: { group: GroupChat; username: string; onBack: () => void }) {
-  const [messages, setMessages] = useState<GroupMessage[]>([]);
-  const [input, setInput]       = useState("");
-  const [loading, setLoading]   = useState(true);
-  const [sending, setSending]   = useState(false);
-  const bottomRef               = useRef<HTMLDivElement>(null);
-  const inputRef                = useRef<HTMLInputElement>(null);
+  const [messages, setMessages]   = useState<GroupMessage[]>([]);
+  const [input, setInput]         = useState("");
+  const [loading, setLoading]     = useState(true);
+  const [sending, setSending]     = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
+  const bottomRef                 = useRef<HTMLDivElement>(null);
+  const inputRef                  = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     supabase.from("group_messages").select("*")
@@ -156,22 +201,54 @@ function GroupChatView({ group, username, onBack }: { group: GroupChat; username
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "var(--bg)", display: "flex", flexDirection: "column", zIndex: 200 }}>
+
+      {/* Members panel overlay */}
+      {showMembers && (
+        <MembersPanel group={group} username={username} onClose={() => setShowMembers(false)} />
+      )}
+
       {/* Header */}
       <div style={{
         display: "flex", alignItems: "center", gap: 10,
         padding: "12px 16px", borderBottom: "1px solid var(--border)",
         background: "var(--surface)", flexShrink: 0,
       }}>
-        <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: "var(--text-2)", padding: "0 4px" }}>←</button>
-        <div style={{
-          width: 38, height: 38, borderRadius: 10, background: "var(--surface)",
-          border: "1.5px solid var(--border-mid)",
-          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0,
-        }}>👥</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}>{group.name}</div>
-          <div style={{ fontSize: 11, color: "var(--text-3)" }}>{group.members.length} members</div>
+        <button onClick={onBack} style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontSize: 22, color: "var(--text-2)", padding: "0 4px", lineHeight: 1,
+        }}>←</button>
+
+        {/* Tappable group icon + name → opens members */}
+        <div
+          onClick={() => setShowMembers(true)}
+          style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: "pointer" }}
+        >
+          <div style={{
+            width: 38, height: 38, borderRadius: 10, background: "var(--surface)",
+            border: "1.5px solid var(--border-mid)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 20, flexShrink: 0,
+          }}>👥</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}>{group.name}</div>
+            <div style={{ fontSize: 11, color: "var(--green)" }}>
+              {group.members.length} members · tap to view
+            </div>
+          </div>
         </div>
+
+        {/* Members count button */}
+        <button
+          onClick={() => setShowMembers(true)}
+          style={{
+            background: "var(--surface)", border: "1.5px solid var(--border-mid)",
+            borderRadius: 8, padding: "5px 10px", cursor: "pointer",
+            fontSize: 12, color: "var(--text-2)", fontFamily: "inherit", fontWeight: 600,
+            flexShrink: 0,
+          }}
+        >
+          👥 {group.members.length}
+        </button>
       </div>
 
       {/* Messages */}
@@ -252,9 +329,7 @@ function CreateGroupModal({ username, onCreated, onClose }: {
     setCreating(true);
     const members = [username, ...Array.from(selected)];
     const { data } = await supabase.from("group_chats").insert({
-      name: groupName.trim(),
-      created_by: username,
-      members,
+      name: groupName.trim(), created_by: username, members,
     }).select().single();
     if (data) onCreated({ ...data, members });
     setCreating(false);
@@ -271,19 +346,15 @@ function CreateGroupModal({ username, onCreated, onClose }: {
       }}>
         <div style={{ fontWeight: 700, fontSize: 17, color: "var(--text)", marginBottom: 16 }}>New group chat</div>
 
-        <input
-          value={groupName}
-          onChange={(e) => setGroupName(e.target.value)}
-          placeholder="Group name..."
-          style={{
+        <input value={groupName} onChange={(e) => setGroupName(e.target.value)}
+          placeholder="Group name..." style={{
             width: "100%", padding: "11px 14px", borderRadius: 12,
             border: "1.5px solid var(--border-mid)", background: "var(--surface)",
             color: "var(--text)", fontSize: 14, outline: "none",
-            fontFamily: "inherit", boxSizing: "border-box", marginBottom: 14,
-          }}
-        />
+            fontFamily: "inherit", boxSizing: "border-box" as const, marginBottom: 14,
+          }} />
 
-        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" as const, letterSpacing: 0.8, marginBottom: 8 }}>
           Add friends
         </div>
 
@@ -291,40 +362,34 @@ function CreateGroupModal({ username, onCreated, onClose }: {
           <div style={{ color: "var(--text-3)", fontSize: 13, padding: "12px 0" }}>Loading friends...</div>
         ) : friends.length === 0 ? (
           <div style={{ color: "var(--text-3)", fontSize: 13, padding: "12px 0" }}>No friends yet — add friends first.</div>
-        ) : (
-          friends.map((f) => (
-            <div key={f} onClick={() => toggle(f)} style={{
-              display: "flex", alignItems: "center", gap: 10,
-              padding: "10px 12px", borderRadius: 12, marginBottom: 8, cursor: "pointer",
-              background: selected.has(f) ? "rgba(0,200,120,0.08)" : "var(--surface)",
-              border: `1.5px solid ${selected.has(f) ? "var(--green)" : "var(--border-mid)"}`,
+        ) : friends.map((f) => (
+          <div key={f} onClick={() => toggle(f)} style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "10px 12px", borderRadius: 12, marginBottom: 8, cursor: "pointer",
+            background: selected.has(f) ? "rgba(0,200,120,0.08)" : "var(--surface)",
+            border: `1.5px solid ${selected.has(f) ? "var(--green)" : "var(--border-mid)"}`,
+          }}>
+            <Avatar name={f} idx={f.charCodeAt(0) % 6} size={34} fontSize={13} />
+            <div style={{ flex: 1, fontWeight: 600, fontSize: 14, color: "var(--text)" }}>@{f}</div>
+            <div style={{
+              width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+              background: selected.has(f) ? "var(--green)" : "transparent",
+              border: `2px solid ${selected.has(f) ? "var(--green)" : "var(--border-mid)"}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "#fff", fontSize: 13,
             }}>
-              <Avatar name={f} idx={f.charCodeAt(0) % 6} size={34} fontSize={13} />
-              <div style={{ flex: 1, fontWeight: 600, fontSize: 14, color: "var(--text)" }}>@{f}</div>
-              <div style={{
-                width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-                background: selected.has(f) ? "var(--green)" : "transparent",
-                border: `2px solid ${selected.has(f) ? "var(--green)" : "var(--border-mid)"}`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#fff", fontSize: 13,
-              }}>
-                {selected.has(f) && "✓"}
-              </div>
+              {selected.has(f) && "✓"}
             </div>
-          ))
-        )}
+          </div>
+        ))}
 
-        <button
-          onClick={create}
-          disabled={!groupName.trim() || selected.size === 0 || creating}
-          style={{
-            width: "100%", marginTop: 16, padding: "13px", borderRadius: 12,
-            border: "none", fontFamily: "inherit", fontWeight: 700, fontSize: 15,
-            cursor: !groupName.trim() || selected.size === 0 ? "not-allowed" : "pointer",
-            background: !groupName.trim() || selected.size === 0 ? "var(--border-mid)" : "var(--green)",
-            color: "#fff", transition: "background 0.15s",
-          }}
-        >
+        <button onClick={create} disabled={!groupName.trim() || selected.size === 0 || creating} style={{
+          width: "100%", marginTop: 16, padding: "13px", borderRadius: 12,
+          border: "none", fontFamily: "inherit", fontWeight: 700, fontSize: 15,
+          cursor: !groupName.trim() || selected.size === 0 ? "not-allowed" : "pointer",
+          background: !groupName.trim() || selected.size === 0 ? "var(--border-mid)" : "var(--green)",
+          color: "#fff", transition: "background 0.15s",
+        }}>
           {creating ? "Creating..." : `Create group${selected.size > 0 ? ` (${selected.size + 1})` : ""}`}
         </button>
       </div>
@@ -351,7 +416,6 @@ export default function ChatsPage({ games, username, joinedIds, isHost }: Props)
     async function load() {
       const seen = getSeenTimes();
 
-      // Load game chats
       if (myGames.length > 0) {
         const gameIds = myGames.map((g) => g.id);
         const { data: rooms } = await supabase.from("chat_rooms").select("*").in("game_id", gameIds);
@@ -376,13 +440,9 @@ export default function ChatsPage({ games, username, joinedIds, isHost }: Props)
         if (!cancelled) setGameEntries(entries);
       }
 
-      // Load group chats
-      const { data: groups } = await supabase.from("group_chats").select("*")
-        .contains("members", [username]);
-
+      const { data: groups } = await supabase.from("group_chats").select("*").contains("members", [username]);
       if (groups && !cancelled) {
         setGroupChats(groups);
-        // Fetch last message per group
         const lastMsgs: Record<number, LastMessage | null> = {};
         for (const g of groups) {
           const { data: msgs } = await supabase.from("group_messages").select("content, username, created_at")
@@ -420,12 +480,8 @@ export default function ChatsPage({ games, username, joinedIds, isHost }: Props)
     return <div style={{ color: "var(--text-3)", fontSize: 13, textAlign: "center", paddingTop: 48 }}>Loading chats...</div>;
   }
 
-  const totalGameChats  = gameEntries.length;
-  const totalGroupChats = groupChats.length;
-
   return (
     <div>
-      {/* Tab switcher */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         {(["games", "groups"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} style={{
@@ -437,13 +493,12 @@ export default function ChatsPage({ games, username, joinedIds, isHost }: Props)
             fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit",
           }}>
             {t === "games"
-              ? `🏟 Games${totalGameChats > 0 ? ` (${totalGameChats})` : ""}`
-              : `👥 Groups${totalGroupChats > 0 ? ` (${totalGroupChats})` : ""}`}
+              ? `🏟 Games${gameEntries.length > 0 ? ` (${gameEntries.length})` : ""}`
+              : `👥 Groups${groupChats.length > 0 ? ` (${groupChats.length})` : ""}`}
           </button>
         ))}
       </div>
 
-      {/* Game chats */}
       {tab === "games" && (
         <>
           {gameEntries.length === 0 ? (
@@ -467,9 +522,7 @@ export default function ChatsPage({ games, username, joinedIds, isHost }: Props)
                   {sport.icon.startsWith("img:")
                     ? <img src={`/${sport.icon.replace("img:", "")}`} alt={sport.label} style={{ width: "70%", height: "70%", objectFit: "contain" }} />
                     : sport.icon}
-                  {unread && (
-                    <div style={{ position: "absolute", top: 2, right: 2, width: 12, height: 12, borderRadius: "50%", background: "var(--green)", border: "2px solid var(--bg)" }} />
-                  )}
+                  {unread && <div style={{ position: "absolute", top: 2, right: 2, width: 12, height: 12, borderRadius: "50%", background: "var(--green)", border: "2px solid var(--bg)" }} />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
@@ -494,7 +547,6 @@ export default function ChatsPage({ games, username, joinedIds, isHost }: Props)
         </>
       )}
 
-      {/* Group chats */}
       {tab === "groups" && (
         <>
           <button onClick={() => setShowCreate(true)} style={{
