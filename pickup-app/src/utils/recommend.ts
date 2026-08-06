@@ -53,7 +53,6 @@ function computeAdaptiveWeights(history: BookingRecord[]): Weights {
   if (history.length < 3) {
     return { sport: 0.30, host: 0.20, location: 0.18, dayOfWeek: 0.14, hourOfDay: 0.10, skillLevel: 0.08 };
   }
-
   const histSports    = history.map((h) => h.sport);
   const histHosts     = history.map((h) => h.host);
   const histLocations = history.map((h) => h.location);
@@ -69,7 +68,6 @@ function computeAdaptiveWeights(history: BookingRecord[]): Weights {
   const skillConsistency    = 1 - uniqueRatio(histSkills);
 
   const BASE = { sport: 0.10, host: 0.06, location: 0.06, dayOfWeek: 0.06, hourOfDay: 0.06, skillLevel: 0.04 };
-
   const raw = {
     sport:      BASE.sport     + sportConsistency    * 0.30,
     host:       BASE.host      + hostConsistency     * 0.24,
@@ -78,7 +76,6 @@ function computeAdaptiveWeights(history: BookingRecord[]): Weights {
     hourOfDay:  BASE.hourOfDay + hourConsistency     * 0.14,
     skillLevel: BASE.skillLevel + skillConsistency   * 0.10,
   };
-
   const total = Object.values(raw).reduce((a, b) => a + b, 0);
   return {
     sport:      raw.sport     / total,
@@ -96,7 +93,6 @@ function buildAdaptiveReasons(
   dayFreq: number, hourScore: number, skillFreq: number, gameDay: number
 ): string[] {
   const candidates: { weight: number; text: string }[] = [];
-
   if (sportFreq >= 0.3)
     candidates.push({ weight: weights.sport * sportFreq, text: `You often play ${game.sport}` });
   if (hostFreq >= 0.2)
@@ -112,15 +108,11 @@ function buildAdaptiveReasons(
   if (skillFreq >= 0.25)
     candidates.push({ weight: weights.skillLevel * skillFreq, text: `${game.skillLevel} level suits you` });
 
-  return candidates
-    .sort((a, b) => b.weight - a.weight)
-    .slice(0, 2)
-    .map((c) => c.text);
+  return candidates.sort((a, b) => b.weight - a.weight).slice(0, 2).map((c) => c.text);
 }
 
 function localScore(history: BookingRecord[], game: Game): { score: number; reasons: string[] } {
   const weights = computeAdaptiveWeights(history);
-
   const histSports    = history.map((h) => h.sport);
   const histHosts     = history.map((h) => h.host);
   const histLocations = history.map((h) => h.location);
@@ -128,8 +120,8 @@ function localScore(history: BookingRecord[], game: Game): { score: number; reas
   const histHours     = history.map((h) => h.hourOfDay);
   const histSkills    = history.map((h) => h.skillLevel);
 
-  const gameDay   = dayOfWeekFromDate(game.date);
-  const gameHour  = hourFromTime(game.time);
+  const gameDay  = dayOfWeekFromDate(game.date);
+  const gameHour = hourFromTime(game.time);
 
   const sportFreq    = freq(histSports,    game.sport);
   const hostFreq     = freq(histHosts,     game.host);
@@ -146,14 +138,7 @@ function localScore(history: BookingRecord[], game: Game): { score: number; reas
     weights.hourOfDay  * hourScore +
     weights.skillLevel * skillFreq;
 
-  return {
-    score,
-    reasons: buildAdaptiveReasons(
-      weights, game,
-      sportFreq, hostFreq, locationFreq,
-      dayFreq, hourScore, skillFreq, gameDay
-    ),
-  };
+  return { score, reasons: buildAdaptiveReasons(weights, game, sportFreq, hostFreq, locationFreq, dayFreq, hourScore, skillFreq, gameDay) };
 }
 
 export function gameToBookingRecord(game: Game): BookingRecord {
@@ -174,54 +159,43 @@ export async function scoreGamesAsync(
   username: string,
   games: Game[],
   joinedIds: Set<number>,
-  leftIds: Set<number>,          // ← added
+  leftIds: Set<number>,
   liveHistory: BookingRecord[]
 ): Promise<ScoredGame[]> {
-  const seedHistory = USER_HISTORY[username.toLowerCase()] ?? [];
-  // Exclude records for games the user has left
+  const seedHistory  = USER_HISTORY[username.toLowerCase()] ?? [];
   const filteredLive = liveHistory.filter((r) => !leftIds.has(r.gameId));
   const history      = [...seedHistory, ...filteredLive];
-
   if (history.length === 0) return [];
 
-  // Candidates: not joined, not left, not hosting
+  // Only recommend upcoming games the user hasn't joined or left
+  const today = new Date().toISOString().split("T")[0];
   const candidates = games.filter(
-    (g) => !joinedIds.has(g.id) && !leftIds.has(g.id)
+    (g) => !joinedIds.has(g.id) && !leftIds.has(g.id) && g.date >= today
   );
   if (candidates.length === 0) return [];
 
   try {
     const res = await fetch(API_URL, {
-      method:  "POST",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         history: history.map((h) => ({ ...h, costPerPlayer: 0 })),
         candidates: candidates.map((g) => ({
-          id:           g.id,
-          sport:        g.sport,
-          host:         g.host,
-          location:     g.location,
-          city:         g.city,
-          neighborhood: g.location.split(" ")[0],
-          dayOfWeek:    dayOfWeekFromDate(g.date),
-          hourOfDay:    hourFromTime(g.time),
-          skillLevel:   g.skillLevel,
-          costPerPlayer: g.costPerPlayer,
-          distKm:       0,
+          id: g.id, sport: g.sport, host: g.host, location: g.location,
+          city: g.city, neighborhood: g.location.split(" ")[0],
+          dayOfWeek: dayOfWeekFromDate(g.date), hourOfDay: hourFromTime(g.time),
+          skillLevel: g.skillLevel, costPerPlayer: g.costPerPlayer, distKm: 0,
         })),
       }),
     });
-
     if (!res.ok) throw new Error("API error");
     const data = await res.json();
-
     return data.results
       .filter((r: { score: number }) => r.score > 0.02)
       .map((r: { id: number; score: number; reasons: string[] }) => {
         const game = candidates.find((g) => g.id === r.id)!;
         return { game, score: r.score, reasons: r.reasons };
       });
-
   } catch {
     return candidates
       .map((game) => {
@@ -246,8 +220,9 @@ export function scoreGames(
   const history      = [...seedHistory, ...filteredLive];
   if (history.length === 0) return [];
 
+  const today = new Date().toISOString().split("T")[0];
   return games
-    .filter((g) => !joinedIds.has(g.id) && !leftIds.has(g.id))
+    .filter((g) => !joinedIds.has(g.id) && !leftIds.has(g.id) && g.date >= today)
     .map((game) => {
       const { score, reasons } = localScore(history, game);
       return { game, score, reasons };
