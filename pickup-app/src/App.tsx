@@ -7,14 +7,12 @@ import BrowsePage from "./pages/BrowsePage";
 import PostPage from "./pages/PostPage";
 import MyGamesPage from "./pages/MyGamesPage";
 import NotificationsPage from "./pages/NotificationsPage";
-import WalletPage from "./pages/WalletPage";
 import SettingsPage from "./pages/SettingsPage";
 import AuthPage from "./pages/AuthPage";
-import FriendsPage from "./pages/FriendsPage";
-import ChatPage from "./pages/ChatPage";
 import ChatsPage from "./pages/ChatsPage";
-import "./App.css";
+import ChatPage from "./pages/ChatPage";
 import { subscribeUser, unsubscribeUser } from "./lib/onesignal";
+import "./App.css";
 
 let nextNotifId = 1;
 let nextTxId    = 1;
@@ -41,13 +39,8 @@ function rowToGame(row: any): Game {
     recurring:     row.recurring ?? false,
     waitlistMax:   row.waitlist_max ?? 0,
     players:       (row.game_players ?? []).map((p: any) => p.username),
-    joinRequests:  (row.join_requests ?? []).map((r: any) => ({
-      name: r.username,
-      status: r.status,
-    })),
-    waitlist:      (row.waitlist ?? [])
-      .sort((a: any, b: any) => a.position - b.position)
-      .map((w: any) => w.username),
+    joinRequests:  (row.join_requests ?? []).map((r: any) => ({ name: r.username, status: r.status })),
+    waitlist:      (row.waitlist ?? []).sort((a: any, b: any) => a.position - b.position).map((w: any) => w.username),
   };
 }
 
@@ -60,15 +53,27 @@ async function fetchAllGames(): Promise<Game[]> {
   return (data ?? []).map(rowToGame);
 }
 
+const API = "https://pickup-api-n8uj.onrender.com";
+
+async function pushNotify(userIds: string[], title: string, message: string) {
+  if (!userIds.length) return;
+  try {
+    await fetch(`${API}/notify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userIds, title, message }),
+    });
+  } catch (e) { console.error("Push failed:", e); }
+}
+
 export default function App() {
-  const [user, setUser]                   = useState<User | null>(() => {
+  const [user, setUser] = useState<User | null>(() => {
     try {
       const stored = localStorage.getItem("runit_user");
       return stored ? JSON.parse(stored) : null;
     } catch { return null; }
   });
   const [tab, setTab]                     = useState<TabId>("browse");
-  const [notifChatGameId, setNotifChatGameId] = useState<number | null>(null);
   const [games, setGames]                 = useState<Game[]>([]);
   const [loading, setLoading]             = useState(true);
   const [refreshing, setRefreshing]       = useState(false);
@@ -81,24 +86,23 @@ export default function App() {
   const [balance, setBalance]             = useState<number>(0);
   const [transactions, setTransactions]   = useState<WalletTx[]>([]);
   const [hostGameIds, setHostGameIds]     = useState<Set<number>>(new Set());
-  const [darkMode, setDarkMode]           = useState<boolean>(() => {
+  const [notifChatGameId, setNotifChatGameId] = useState<number | null>(null);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
     const stored = localStorage.getItem("theme");
     if (stored) return stored === "dark";
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
-  // Apply theme to html element
+  const userRef = useRef<User | null>(null);
+  userRef.current = user;
+
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
-  const userRef = useRef<User | null>(null);
-  userRef.current = user;
-
-  // Keep Render email API alive
   useEffect(() => {
-    const ping = () => fetch("https://pickup-api-n8uj.onrender.com/health").catch(() => {});
+    const ping = () => fetch(`${API}/health`).catch(() => {});
     ping();
     const interval = setInterval(ping, 10 * 60 * 1000);
     return () => clearInterval(interval);
@@ -111,65 +115,25 @@ export default function App() {
       supabase.from("waitlist").select("game_id").eq("username", username),
     ]);
     setJoinedIds(new Set((playerRows ?? []).map((r: any) => r.game_id)));
-    setRequestedIds(new Set(
-      (requestRows ?? [])
-        .filter((r: any) => r.status === "pending")
-        .map((r: any) => r.game_id)
-    ));
+    setRequestedIds(new Set((requestRows ?? []).filter((r: any) => r.status === "pending").map((r: any) => r.game_id)));
     setWaitlistedIds(new Set((waitlistRows ?? []).map((r: any) => r.game_id)));
   }
 
-  // Poll for friend requests and game invites and surface as notifications
   async function loadSocialNotifs(username: string) {
     const [{ data: friendReqs }, { data: gameInvites }] = await Promise.all([
-      supabase
-        .from("friendships")
-        .select("*")
-        .eq("recipient", username)
-        .eq("status", "pending"),
-      supabase
-        .from("game_invites")
-        .select("*, games(sport, location)")
-        .eq("invitee", username)
-        .eq("status", "pending"),
+      supabase.from("friendships").select("*").eq("recipient", username).eq("status", "pending"),
+      supabase.from("game_invites").select("*, games(sport, location)").eq("invitee", username).eq("status", "pending"),
     ]);
-
     const newNotifs: Notification[] = [];
-
     for (const req of friendReqs ?? []) {
-      newNotifs.push({
-        id: nextNotifId++,
-        type: "friend_request",
-        gameId: 0,
-        gameSport: "",
-        gameLocation: "",
-        playerName: req.requester,
-        timestamp: new Date(req.created_at),
-        read: false,
-      });
+      newNotifs.push({ id: nextNotifId++, type: "friend_request", gameId: 0, gameSport: "", gameLocation: "", playerName: req.requester, timestamp: new Date(req.created_at), read: false });
     }
-
     for (const inv of gameInvites ?? []) {
-      newNotifs.push({
-        id: nextNotifId++,
-        type: "game_invite",
-        gameId: inv.game_id,
-        gameSport: inv.games?.sport ?? "",
-        gameLocation: inv.games?.location ?? "",
-        playerName: inv.inviter,
-        timestamp: new Date(inv.created_at),
-        read: false,
-      });
+      newNotifs.push({ id: nextNotifId++, type: "game_invite", gameId: inv.game_id, gameSport: inv.games?.sport ?? "", gameLocation: inv.games?.location ?? "", playerName: inv.inviter, timestamp: new Date(inv.created_at), read: false });
     }
-
     if (newNotifs.length > 0) {
       setNotifications((prev) => {
-        // Don't duplicate — check by type+playerName+gameId
-        const filtered = newNotifs.filter(
-          (n) => !prev.some(
-            (p) => p.type === n.type && p.playerName === n.playerName && p.gameId === n.gameId
-          )
-        );
+        const filtered = newNotifs.filter((n) => !prev.some((p) => p.type === n.type && p.playerName === n.playerName && p.gameId === n.gameId));
         return [...filtered, ...prev];
       });
     }
@@ -189,47 +153,21 @@ export default function App() {
 
   useEffect(() => { refreshGames(); }, [refreshGames]);
 
-  // Poll social notifs every 30s
   useEffect(() => {
     if (!user) return;
     const interval = setInterval(() => loadSocialNotifs(user.username), 30000);
     return () => clearInterval(interval);
   }, [user]);
 
-  // Supabase Realtime
   useEffect(() => {
-    const channel = supabase
-      .channel("db-changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "games" }, () => {
-        const u = userRef.current;
-        if (u) refreshGames(false, u.username);
-        else refreshGames();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "game_players" }, () => {
-        const u = userRef.current;
-        if (u) refreshGames(false, u.username);
-        else refreshGames();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "join_requests" }, () => {
-        const u = userRef.current;
-        if (u) refreshGames(false, u.username);
-        else refreshGames();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "waitlist" }, () => {
-        const u = userRef.current;
-        if (u) refreshGames(false, u.username);
-        else refreshGames();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "friendships" }, () => {
-        const u = userRef.current;
-        if (u) loadSocialNotifs(u.username);
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "game_invites" }, () => {
-        const u = userRef.current;
-        if (u) loadSocialNotifs(u.username);
-      })
+    const channel = supabase.channel("db-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "games" }, () => { const u = userRef.current; if (u) refreshGames(false, u.username); else refreshGames(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "game_players" }, () => { const u = userRef.current; if (u) refreshGames(false, u.username); else refreshGames(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "join_requests" }, () => { const u = userRef.current; if (u) refreshGames(false, u.username); else refreshGames(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "waitlist" }, () => { const u = userRef.current; if (u) refreshGames(false, u.username); else refreshGames(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "friendships" }, () => { const u = userRef.current; if (u) loadSocialNotifs(u.username); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "game_invites" }, () => { const u = userRef.current; if (u) loadSocialNotifs(u.username); })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [refreshGames]);
 
@@ -252,7 +190,12 @@ export default function App() {
     localStorage.setItem("runit_user", JSON.stringify(u));
     await Promise.all([refreshGames(), loadUserGameState(u.username)]);
     await loadSocialNotifs(u.username);
-    subscribeUser(u.username); // register for push notifications
+    subscribeUser(u.username);
+  }
+
+  function handleUsernameChange(newUsername: string) {
+    setUser({ username: newUsername });
+    localStorage.setItem("runit_user", JSON.stringify({ username: newUsername }));
   }
 
   function handleLogout() {
@@ -274,22 +217,6 @@ export default function App() {
       { id: nextNotifId++, type, gameId, gameSport, gameLocation, playerName, timestamp: new Date(), read: false },
       ...prev,
     ]);
-  }
-
-
-  const API = "https://pickup-api-n8uj.onrender.com";
-
-  async function pushNotify(userIds: string[], title: string, message: string) {
-    if (!userIds.length) return;
-    try {
-      await fetch(`${API}/notify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userIds, title, message }),
-      });
-    } catch (e) {
-      console.error("Push failed:", e);
-    }
   }
 
   function addTx(type: WalletTx["type"], amount: number, label: string) {
@@ -342,12 +269,9 @@ export default function App() {
     setLiveHistory((prev) => [...prev, gameToBookingRecord(game)]);
     if (!isHost(id)) {
       addNotif("you_joined", id, game.sport, game.location, user!.username);
-      // Notify host
       pushNotify([game.host], "New player joined! 🎉", `${user!.username} joined your ${game.sport} game at ${game.location}`);
     }
-    // Mark any invite for this game as accepted
-    await supabase.from("game_invites").update({ status: "accepted" })
-      .eq("game_id", id).eq("invitee", user!.username);
+    await supabase.from("game_invites").update({ status: "accepted" }).eq("game_id", id).eq("invitee", user!.username);
     await refreshGames();
   }
 
@@ -409,28 +333,15 @@ export default function App() {
 
   async function addGame(partial: Omit<Game, "id">) {
     const { data, error } = await supabase.from("games").insert({
-      sport:           partial.sport,
-      location:        partial.location,
-      city:            partial.city,
-      lat:             partial.lat,
-      lng:             partial.lng,
-      date:            partial.date,
-      time:            partial.time,
-      duration:        partial.duration,
-      spots:           partial.spots,
-      note:            partial.note,
-      host:            partial.host,
-      host_id:         null,
-      skill_level:     partial.skillLevel,
-      privacy:         partial.privacy,
-      ground_cost:     partial.groundCost,
-      cost_per_player: partial.costPerPlayer,
-      recurring:       partial.recurring,
-      waitlist_max:    partial.waitlistMax,
+      sport: partial.sport, location: partial.location, city: partial.city,
+      lat: partial.lat, lng: partial.lng, date: partial.date, time: partial.time,
+      duration: partial.duration, spots: partial.spots, note: partial.note,
+      host: partial.host, host_id: null, skill_level: partial.skillLevel,
+      privacy: partial.privacy, ground_cost: partial.groundCost,
+      cost_per_player: partial.costPerPlayer, recurring: partial.recurring,
+      waitlist_max: partial.waitlistMax,
     }).select().single();
-
     if (error || !data) { console.error("addGame:", error); return; }
-
     const newId = data.id;
     await supabase.from("game_players").insert({ game_id: newId, username: partial.host });
     setJoinedIds((prev) => new Set(prev).add(newId));
@@ -492,21 +403,13 @@ export default function App() {
 
   const sharedGameProps = {
     games, joinedIds, requestedIds, leftIds, waitlistedIds, isHost,
-    balance,
-    username: user.username,
-    liveHistory,
-    onJoin:          joinGame,
-    onLeave:         leaveGame,
-    onRequest:       requestJoin,
-    onCancel:        cancelRequest,
-    onJoinWaitlist:  joinWaitlist,
-    onLeaveWaitlist: leaveWaitlist,
-    onApprove:       approveRequest,
-    onDeny:          denyRequest,
-    onGoToWallet:    () => setTab("wallet"),
-    onRefresh:       () => refreshGames(true, user.username),
-    onUnhost:        deleteGame,
-    refreshing,
+    balance, username: user.username, liveHistory,
+    onJoin: joinGame, onLeave: leaveGame, onRequest: requestJoin,
+    onCancel: cancelRequest, onJoinWaitlist: joinWaitlist,
+    onLeaveWaitlist: leaveWaitlist, onApprove: approveRequest,
+    onDeny: denyRequest, onGoToWallet: () => setTab("wallet"),
+    onRefresh: () => refreshGames(true, user.username),
+    onUnhost: deleteGame, refreshing,
   };
 
   return (
@@ -523,10 +426,10 @@ export default function App() {
         </header>
 
         <main className="content">
-          {tab === "browse"        && <BrowsePage {...sharedGameProps} />}
-          {tab === "post"          && <PostPage onPost={addGame} onSuccess={() => setTab("browse")} username={user.username} />}
-          {tab === "mine"          && <MyGamesPage {...sharedGameProps} />}
-          {tab === "chats"         && <ChatsPage games={games} username={user.username} joinedIds={joinedIds} isHost={isHost} />}
+          {tab === "browse" && <BrowsePage {...sharedGameProps} />}
+          {tab === "post"   && <PostPage onPost={addGame} onSuccess={() => setTab("browse")} username={user.username} />}
+          {tab === "mine"   && <MyGamesPage {...sharedGameProps} />}
+          {tab === "chats"  && <ChatsPage games={games} username={user.username} joinedIds={joinedIds} isHost={isHost} />}
           {tab === "notifications" && (
             notifChatGameId ? (
               (() => {
@@ -536,32 +439,27 @@ export default function App() {
               })()
             ) : (
               <NotificationsPage
-                notifications={notifications}
-                games={games}
-                joinedIds={joinedIds}
-                requestedIds={requestedIds}
-                waitlistedIds={waitlistedIds}
-                balance={balance}
-                username={user.username}
-                isHost={isHost}
-                onMarkRead={markRead}
-                onMarkAllRead={markAllRead}
-                onJoin={joinGame}
-                onLeave={leaveGame}
-                onRequest={requestJoin}
-                onCancel={cancelRequest}
-                onJoinWaitlist={joinWaitlist}
-                onLeaveWaitlist={leaveWaitlist}
-                onApprove={approveRequest}
-                onDeny={denyRequest}
-                onGoToWallet={() => setTab("wallet")}
-                onUnhost={deleteGame}
+                notifications={notifications} games={games}
+                joinedIds={joinedIds} requestedIds={requestedIds}
+                waitlistedIds={waitlistedIds} balance={balance}
+                username={user.username} isHost={isHost}
+                onMarkRead={markRead} onMarkAllRead={markAllRead}
+                onJoin={joinGame} onLeave={leaveGame}
+                onRequest={requestJoin} onCancel={cancelRequest}
+                onJoinWaitlist={joinWaitlist} onLeaveWaitlist={leaveWaitlist}
+                onApprove={approveRequest} onDeny={denyRequest}
+                onGoToWallet={() => setTab("wallet")} onUnhost={deleteGame}
                 onOpenChat={(id) => setNotifChatGameId(id)}
               />
             )
           )}
           {tab === "wallet" && (
-            <SettingsPage user={user} balance={balance} transactions={transactions} onTopUp={topUp} onLogout={handleLogout} darkMode={darkMode} onToggleDarkMode={() => setDarkMode(d => !d)} />
+            <SettingsPage
+              user={user} balance={balance} transactions={transactions}
+              onTopUp={topUp} onLogout={handleLogout}
+              darkMode={darkMode} onToggleDarkMode={() => setDarkMode(d => !d)}
+              onUsernameChange={handleUsernameChange}
+            />
           )}
         </main>
 
@@ -583,24 +481,9 @@ export default function App() {
   );
 }
 
-function BrowseIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M16.5 16.5l4 4" /></svg>;
-}
-function PostIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></svg>;
-}
-function MyIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 9h8M8 13h5" /></svg>;
-}
-function ChatsIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>;
-}
-function FriendsIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="9" cy="7" r="3" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" /><path d="M16 3.13a4 4 0 010 7.75" /><path d="M21 21v-2a4 4 0 00-3-3.85" /></svg>;
-}
-function NotifIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M6 10a6 6 0 0112 0v3l2 3H4l2-3v-3z" /><path d="M10 19a2 2 0 004 0" /></svg>;
-}
-function SettingsIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>;
-}
+function BrowseIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M16.5 16.5l4 4" /></svg>; }
+function PostIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></svg>; }
+function MyIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 9h8M8 13h5" /></svg>; }
+function ChatsIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>; }
+function NotifIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M6 10a6 6 0 0112 0v3l2 3H4l2-3v-3z" /><path d="M10 19a2 2 0 004 0" /></svg>; }
+function SettingsIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>; }

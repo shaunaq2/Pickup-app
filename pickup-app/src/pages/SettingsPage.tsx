@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
 import { User, WalletTx } from "../types";
+import { supabase } from "../lib/supabase";
 import FriendsPage from "./FriendsPage";
+import ProfileEditPage from "./ProfileEditPage";
 import Avatar from "../components/Avatar";
 
 interface Props {
@@ -12,9 +13,10 @@ interface Props {
   onLogout: () => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
+  onUsernameChange: (newUsername: string) => void;
 }
 
-type Section = "main" | "wallet" | "topup" | "friends" | "notifications" | "privacy";
+type Section = "main" | "wallet" | "topup" | "friends" | "notifications" | "privacy" | "profile";
 
 const TOP_UP_AMOUNTS = [5, 10, 20, 50];
 const PAYMENT_METHODS = [
@@ -24,31 +26,16 @@ const PAYMENT_METHODS = [
   { id: "venmo",  label: "Venmo",                icon: "💙" },
 ];
 
-// Notification preferences stored in localStorage
 type NotifPrefs = {
-  gameJoined: boolean;
-  gameLeft: boolean;
-  requestReceived: boolean;
-  requestApproved: boolean;
-  requestDenied: boolean;
-  offWaitlist: boolean;
-  friendRequest: boolean;
-  friendAccepted: boolean;
-  gameInvite: boolean;
-  emailAlerts: boolean;
+  gameJoined: boolean; gameLeft: boolean; requestReceived: boolean;
+  requestApproved: boolean; requestDenied: boolean; offWaitlist: boolean;
+  friendRequest: boolean; friendAccepted: boolean; gameInvite: boolean; emailAlerts: boolean;
 };
 
 const DEFAULT_NOTIF_PREFS: NotifPrefs = {
-  gameJoined:      true,
-  gameLeft:        true,
-  requestReceived: true,
-  requestApproved: true,
-  requestDenied:   true,
-  offWaitlist:     true,
-  friendRequest:   true,
-  friendAccepted:  true,
-  gameInvite:      true,
-  emailAlerts:     true,
+  gameJoined: true, gameLeft: true, requestReceived: true, requestApproved: true,
+  requestDenied: true, offWaitlist: true, friendRequest: true, friendAccepted: true,
+  gameInvite: true, emailAlerts: true,
 };
 
 function loadNotifPrefs(): NotifPrefs {
@@ -68,22 +55,15 @@ function formatDate(d: Date): string {
 
 function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div
-      onClick={() => onChange(!value)}
-      style={{
-        width: 44, height: 26, borderRadius: 13, flexShrink: 0,
-        background: value ? "var(--green)" : "var(--border-mid)",
-        position: "relative", cursor: "pointer",
-        transition: "background 0.2s",
-      }}
-    >
+    <div onClick={() => onChange(!value)} style={{
+      width: 44, height: 26, borderRadius: 13, flexShrink: 0,
+      background: value ? "var(--green)" : "var(--border-mid)",
+      position: "relative", cursor: "pointer", transition: "background 0.2s",
+    }}>
       <div style={{
-        position: "absolute", top: 3,
-        left: value ? 21 : 3,
-        width: 20, height: 20, borderRadius: "50%",
-        background: "#fff",
-        transition: "left 0.2s",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+        position: "absolute", top: 3, left: value ? 21 : 3,
+        width: 20, height: 20, borderRadius: "50%", background: "#fff",
+        transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
       }} />
     </div>
   );
@@ -91,10 +71,7 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
 
 function NotifRow({ label, sub, value, onChange }: { label: string; sub?: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div style={{
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "12px 0", borderBottom: "1px solid var(--border)",
-    }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
       <div>
         <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{label}</div>
         {sub && <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 1 }}>{sub}</div>}
@@ -104,50 +81,57 @@ function NotifRow({ label, sub, value, onChange }: { label: string; sub?: string
   );
 }
 
-export default function SettingsPage({ user, balance, transactions, onTopUp, onLogout, darkMode, onToggleDarkMode }: Props) {
-  const [section, setSection]         = useState<Section>("main");
-  const [topUpAmount, setTopUpAmount] = useState(10);
-  const [payMethod, setPayMethod]     = useState("card");
-  const [confirming, setConfirming]   = useState(false);
-  const [notifPrefs, setNotifPrefs]   = useState<NotifPrefs>(loadNotifPrefs);
-  const [installPrompt, setInstallPrompt] = React.useState<any>(null);
-  const [installed, setInstalled] = React.useState(false);
+export default function SettingsPage({ user, balance, transactions, onTopUp, onLogout, darkMode, onToggleDarkMode, onUsernameChange }: Props) {
+  const [section, setSection]           = useState<Section>("main");
+  const [topUpAmount, setTopUpAmount]   = useState(10);
+  const [payMethod, setPayMethod]       = useState("card");
+  const [confirming, setConfirming]     = useState(false);
+  const [notifPrefs, setNotifPrefs]     = useState<NotifPrefs>(loadNotifPrefs);
+  const [avatarUrl, setAvatarUrl]       = useState<string | null>(null);
+  const [currentUsername, setCurrentUsername] = useState(user.username);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [installed, setInstalled]       = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
-    window.addEventListener('beforeinstallprompt', handler);
-    window.addEventListener('appinstalled', () => setInstalled(true));
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", () => setInstalled(true));
+    return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  async function handleInstall() {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') setInstalled(true);
-    setInstallPrompt(null);
-  }
+  // Load avatar
+  useEffect(() => {
+    supabase.from("user_profiles").select("avatar_url")
+      .eq("username", user.username).maybeSingle()
+      .then(({ data }) => { if (data?.avatar_url) setAvatarUrl(data.avatar_url); });
+  }, [user.username]);
 
   function updatePref(key: keyof NotifPrefs, value: boolean) {
     const updated = { ...notifPrefs, [key]: value };
     setNotifPrefs(updated);
     saveNotifPrefs(updated);
-    // Sync show_games_joined to Supabase so friends can read it
     if (key === "gameJoined") {
       supabase.from("user_prefs").upsert(
-        { username: user.username, show_games_joined: value },
+        { username: currentUsername, show_games_joined: value },
         { onConflict: "username" }
       );
     }
   }
 
-  // Sync on mount
   useEffect(() => {
     supabase.from("user_prefs").upsert(
-      { username: user.username, show_games_joined: notifPrefs.gameJoined },
+      { username: currentUsername, show_games_joined: notifPrefs.gameJoined },
       { onConflict: "username" }
     );
-  }, [user.username]);
+  }, [currentUsername]);
+
+  async function handleInstall() {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") setInstalled(true);
+    setInstallPrompt(null);
+  }
 
   function doTopUp() {
     onTopUp(topUpAmount);
@@ -155,82 +139,81 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
     setSection("wallet");
   }
 
-  // ── Friends ──────────────────────────────────────────────
-  if (section === "friends") {
+  // ── Profile edit ──────────────────────────────────────────
+  if (section === "profile") {
     return (
       <div className="settings-section">
-        <FriendsPage username={user.username} onBackToSettings={() => setSection("main")} />
+        <ProfileEditPage
+          username={currentUsername}
+          onBack={() => setSection("main")}
+          onUsernameChange={(newName) => {
+            setCurrentUsername(newName);
+            onUsernameChange(newName);
+            setSection("main");
+          }}
+        />
       </div>
     );
   }
 
-  // ── Notification Prefs ───────────────────────────────────
+  // ── Friends ───────────────────────────────────────────────
+  if (section === "friends") {
+    return (
+      <div className="settings-section">
+        <FriendsPage username={currentUsername} onBackToSettings={() => setSection("main")} />
+      </div>
+    );
+  }
+
+  // ── Notification Prefs ────────────────────────────────────
   if (section === "notifications") {
     return (
       <div className="settings-section">
         <button className="settings-back" onClick={() => setSection("main")}>← Back</button>
         <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>Notifications</div>
-        <div style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 20 }}>
-          Choose what you get notified about.
-        </div>
-
-        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 }}>
-          Email
-        </div>
+        <div style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 20 }}>Choose what you get notified about.</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" as const, letterSpacing: 0.8, marginBottom: 4 }}>Email</div>
         <NotifRow label="Email alerts" sub="Get notified by email for key activity" value={notifPrefs.emailAlerts} onChange={(v) => updatePref("emailAlerts", v)} />
-
-        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.8, marginTop: 20, marginBottom: 4 }}>
-          Games
-        </div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" as const, letterSpacing: 0.8, marginTop: 20, marginBottom: 4 }}>Games</div>
         <NotifRow label="You joined a game"      value={notifPrefs.gameJoined}      onChange={(v) => updatePref("gameJoined", v)} />
         <NotifRow label="You left a game"        value={notifPrefs.gameLeft}        onChange={(v) => updatePref("gameLeft", v)} />
         <NotifRow label="Join request received"  sub="When someone requests to join your game" value={notifPrefs.requestReceived} onChange={(v) => updatePref("requestReceived", v)} />
         <NotifRow label="Request approved"       value={notifPrefs.requestApproved} onChange={(v) => updatePref("requestApproved", v)} />
         <NotifRow label="Request denied"         value={notifPrefs.requestDenied}   onChange={(v) => updatePref("requestDenied", v)} />
         <NotifRow label="Off the waitlist"       sub="When a spot opens up for you" value={notifPrefs.offWaitlist} onChange={(v) => updatePref("offWaitlist", v)} />
-        <NotifRow label="Game invite"            sub="When a friend invites you to a game" value={notifPrefs.gameInvite} onChange={(v) => updatePref("gameInvite", v)} />
-
-        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.8, marginTop: 20, marginBottom: 4 }}>
-          Friends
-        </div>
+        <NotifRow label="Game invite"            sub="When a friend invites you" value={notifPrefs.gameInvite} onChange={(v) => updatePref("gameInvite", v)} />
+        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" as const, letterSpacing: 0.8, marginTop: 20, marginBottom: 4 }}>Friends</div>
         <NotifRow label="Friend request"         value={notifPrefs.friendRequest}   onChange={(v) => updatePref("friendRequest", v)} />
         <NotifRow label="Friend request accepted" value={notifPrefs.friendAccepted} onChange={(v) => updatePref("friendAccepted", v)} />
       </div>
     );
   }
 
-  // ── Privacy ──────────────────────────────────────────────
+  // ── Privacy ───────────────────────────────────────────────
   if (section === "privacy") {
     return (
       <div className="settings-section">
         <button className="settings-back" onClick={() => setSection("main")}>← Back</button>
         <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>Privacy</div>
-        <div style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 20 }}>
-          Control who can see your profile and activity.
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-          {[
-            { label: "Profile visible to players", sub: "Other players can see your username" },
-            { label: "Show in search results",     sub: "People can find you by username" },
-            { label: "Show games I've joined",     sub: "Visible to your friends" },
-          ].map(({ label, sub }) => (
-            <div key={label} style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "12px 0", borderBottom: "1px solid var(--border)",
-            }}>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{label}</div>
-                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 1 }}>{sub}</div>
-              </div>
-              <Toggle value={true} onChange={() => {}} />
+        <div style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 20 }}>Control who can see your profile and activity.</div>
+        {[
+          { label: "Profile visible to players", sub: "Other players can see your username" },
+          { label: "Show in search results", sub: "People can find you by username" },
+          { label: "Show games I've joined", sub: "Visible to your friends" },
+        ].map(({ label, sub }) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{label}</div>
+              <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 1 }}>{sub}</div>
             </div>
-          ))}
-        </div>
+            <Toggle value={true} onChange={() => {}} />
+          </div>
+        ))}
       </div>
     );
   }
 
-  // ── Top-up confirm ───────────────────────────────────────
+  // ── Top-up confirm ────────────────────────────────────────
   if (section === "topup") {
     if (confirming) {
       return (
@@ -255,7 +238,7 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
         <button className="settings-back" onClick={() => setSection("wallet")}>← Back</button>
         <div className="form-group">
           <label className="form-label">Amount</label>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
             {TOP_UP_AMOUNTS.map((a) => (
               <button key={a} className={`radius-chip ${topUpAmount === a ? "active" : ""}`}
                 style={{ fontSize: 14, padding: "8px 16px" }} onClick={() => setTopUpAmount(a)}>
@@ -272,7 +255,7 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
                 display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 10,
                 border: `1.5px solid ${payMethod === m.id ? "var(--green)" : "var(--border)"}`,
                 background: payMethod === m.id ? "var(--green-light)" : "var(--surface)",
-                cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                cursor: "pointer", fontFamily: "inherit", textAlign: "left" as const,
               }}>
                 <span style={{ fontSize: 20 }}>{m.icon}</span>
                 <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text)" }}>{m.label}</span>
@@ -286,7 +269,7 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
     );
   }
 
-  // ── Wallet ───────────────────────────────────────────────
+  // ── Wallet ────────────────────────────────────────────────
   if (section === "wallet") {
     return (
       <div className="settings-section">
@@ -299,8 +282,7 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
         <div className="form-label" style={{ marginTop: 20, marginBottom: 10 }}>Transaction history</div>
         {transactions.length === 0 ? (
           <div className="empty" style={{ paddingTop: 20 }}>
-            <div className="empty-icon">💳</div>
-            No transactions yet.
+            <div className="empty-icon">💳</div>No transactions yet.
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -321,31 +303,26 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
     );
   }
 
-  // ── Main ─────────────────────────────────────────────────
+  // ── Main ──────────────────────────────────────────────────
   return (
     <div className="settings-section">
 
-      {/* Profile card */}
-      <div className="settings-profile-card">
-        <div className="settings-avatar">{user.username[0].toUpperCase()}</div>
-        <div>
-          <div className="settings-username">@{user.username}</div>
-          <div className="settings-member">PickUp member</div>
+      {/* Profile card — clickable */}
+      <div className="settings-profile-card" onClick={() => setSection("profile")} style={{ cursor: "pointer" }}>
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="avatar" style={{
+            width: 52, height: 52, borderRadius: "50%",
+            objectFit: "cover", border: "2px solid var(--green)", flexShrink: 0,
+          }} />
+        ) : (
+          <div className="settings-avatar">{currentUsername[0].toUpperCase()}</div>
+        )}
+        <div style={{ flex: 1 }}>
+          <div className="settings-username">@{currentUsername}</div>
+          <div className="settings-member">Tap to edit profile</div>
         </div>
+        <span style={{ fontSize: 18, color: "var(--text-3)" }}>›</span>
       </div>
-
-      {/* Social */}
-      <div className="settings-group-label">Social</div>
-      <button className="settings-row" onClick={() => setSection("friends")}>
-        <span className="settings-row-icon">👥</span>
-        <div className="settings-row-body">
-          <div className="settings-row-label">Friends</div>
-          <div className="settings-row-sub">Add friends, share QR code</div>
-        </div>
-        <span className="settings-row-arrow">›</span>
-      </button>
-
-      <div className="settings-divider" />
 
       {/* Install app */}
       {(installPrompt || installed) && (
@@ -355,7 +332,7 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
             <span className="settings-row-icon">📲</span>
             <div className="settings-row-body">
               <div className="settings-row-label">Install RunIt</div>
-              <div className="settings-row-sub">{installed ? "App installed on your device" : "Add to your home screen"}</div>
+              <div className="settings-row-sub">{installed ? "Installed" : "Add to your home screen"}</div>
             </div>
             {!installed && (
               <button onClick={handleInstall} style={{
@@ -370,7 +347,20 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
         </>
       )}
 
-      {/* Wallet */}
+      {/* Social */}
+      <div className="settings-group-label">Social</div>
+      <button className="settings-row" onClick={() => setSection("friends")}>
+        <span className="settings-row-icon">👥</span>
+        <div className="settings-row-body">
+          <div className="settings-row-label">Friends</div>
+          <div className="settings-row-sub">Add friends, share QR code</div>
+        </div>
+        <span className="settings-row-arrow">›</span>
+      </button>
+
+      <div className="settings-divider" />
+
+      {/* Finance */}
       <div className="settings-group-label">Finance</div>
       <button className="settings-row" onClick={() => setSection("wallet")}>
         <span className="settings-row-icon">💰</span>
@@ -391,27 +381,13 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
           <div className="settings-row-label">Dark mode</div>
           <div className="settings-row-sub">{darkMode ? "On" : "Off"}</div>
         </div>
-        <div onClick={onToggleDarkMode} style={{
-          width: 44, height: 26, borderRadius: 13,
-          background: darkMode ? "var(--green)" : "var(--border-mid)",
-          position: "relative", cursor: "pointer", transition: "background 0.2s", flexShrink: 0,
-        }}>
-          <div style={{
-            position: "absolute", top: 3,
-            left: darkMode ? 21 : 3,
-            width: 20, height: 20, borderRadius: "50%",
-            background: "#fff", transition: "left 0.2s",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-          }} />
-        </div>
+        <Toggle value={darkMode} onChange={onToggleDarkMode} />
       </div>
       <button className="settings-row" onClick={() => setSection("notifications")}>
         <span className="settings-row-icon">🔔</span>
         <div className="settings-row-body">
           <div className="settings-row-label">Notifications</div>
-          <div className="settings-row-sub">
-            {Object.values(notifPrefs).filter(Boolean).length} of {Object.keys(notifPrefs).length} enabled
-          </div>
+          <div className="settings-row-sub">{Object.values(notifPrefs).filter(Boolean).length} of {Object.keys(notifPrefs).length} enabled</div>
         </div>
         <span className="settings-row-arrow">›</span>
       </button>
@@ -432,7 +408,7 @@ export default function SettingsPage({ user, balance, transactions, onTopUp, onL
         <span className="settings-row-icon">📱</span>
         <div className="settings-row-body">
           <div className="settings-row-label">App version</div>
-          <div className="settings-row-sub">PickUp 1.0.0</div>
+          <div className="settings-row-sub">RunIt 1.0.0</div>
         </div>
       </div>
 
